@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le Fil Rouge</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* Fehleranzeige: zeigt Probleme sichtbar an statt eines leeren Bildschirms */
+window.addEventListener('error',function(e){var d=document.getElementById('errbox');if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#7a1f2b;color:#fff;padding:10px 14px;border-radius:10px;font:14px sans-serif';(document.body||document.documentElement).appendChild(d)}d.textContent='Fehler: '+(e.message||'unbekannt')+(e.lineno?' (Zeile '+e.lineno+')':'')});
+</script>
+<script>
+/* >>> HIER DEINE FIREBASE-DATEN EINFÜGEN: nur die Teile zwischen den Anführungszeichen ersetzen <<< */
+window.FIL_CONFIG={
+  apiKey:"AIzaSyCSCrUozX7HvQdHDOeTcE79De-RmtJUFqE",
+  authDomain:"franzgame-68d3f.firebaseapp.com",
+  databaseURL:"https://franzgame-68d3f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"franzgame-68d3f",
+  appId:"1:640469775296:web:786c6130df3c2f752e0e25"
+};
+</script>
+<style>body{margin:0}</style>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700;6..96,900&family=Public+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: eine Bühne in der Mitte, Fantasy-Nacht in Indigo mit Gold und arkanem Türkis; jeder Bildschirm ist eine Karte auf der Bühne. */
+:root{
+  --bg:#080d1c;--bg2:#101936;--panel:rgba(17,25,52,.86);--panel-2:rgba(32,45,90,.72);--line:#2c3c72;--line-2:#4659a8;
+  --gold:#f2b441;--gold-2:#ffd98c;--gold-ink:#2a1c03;--arc:#86b6ff;--vio:#ff6b6b;--ember:#ff9f6e;
+  --good:#5fd69a;--good-bg:rgba(95,214,154,.16);--bad:#ff6b7d;--bad-bg:rgba(255,107,125,.16);
+  --fg:#eef1fb;--fg-2:#b6bfe0;--fg-3:#838db8;--paper:#f3ead7;--paper-ink:#2b2118;
+  --display:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;--body:"Public Sans","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16.5px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100dvh}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(900px 520px at 80% -8%,rgba(70,100,210,.28),transparent 65%),radial-gradient(800px 600px at 6% 108%,rgba(229,72,77,.13),transparent 60%),linear-gradient(180deg,#0a1126,#060913)}
+body::after{content:"";position:fixed;left:0;right:0;top:0;height:4px;z-index:60;background:linear-gradient(90deg,#2b59c3 0 33.3%,#f4f4f4 33.3% 66.6%,#e5484d 66.6%)}
+#motes{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0;text-align:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--arc);outline-offset:2px;border-radius:8px}
+svg.i{width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;min-height:100dvh;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column}
+.screen{flex:1;display:flex;flex-direction:column;gap:18px;min-width:0}
+.screen.fresh{animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.center{align-items:center;justify-content:center;text-align:center}
+.logo{font-family:var(--display);font-weight:900;letter-spacing:.1em;font-size:clamp(36px,8.5vw,76px);line-height:1.02;color:var(--gold-2);text-shadow:0 0 28px rgba(242,180,65,.4),0 2px 0 #7a5a16;text-wrap:balance}
+.sub{font-family:var(--display);letter-spacing:.2em;text-transform:uppercase;font-size:clamp(11px,2.4vw,14px);color:var(--arc);margin-top:10px}
+.h2{font-family:var(--display);font-weight:700;font-size:clamp(20px,3.4vw,28px);color:var(--gold-2);letter-spacing:.03em;text-wrap:balance}
+.lbl{font-family:var(--display);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-3)}
+.muted{color:var(--fg-2)}.sp{flex:1}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;backdrop-filter:blur(6px);box-shadow:0 10px 40px rgba(0,0,0,.35);min-width:0}
+.panel.pad-s{padding:14px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:11px 20px;border-radius:12px;border:1px solid var(--line-2);background:var(--panel-2);font-family:var(--display);font-weight:700;letter-spacing:.05em;font-size:15px;color:var(--fg);transition:transform .15s,background .15s,border-color .15s}
+.btn:hover{background:rgba(70,60,140,.55);border-color:var(--vio);transform:translateY(-1px)}
+.btn.gold{background:linear-gradient(180deg,#f3d27e,#cf9f3d);border-color:#ffe9a8;color:var(--gold-ink);box-shadow:0 0 22px rgba(242,180,65,.3)}
+.btn.gold:hover{background:linear-gradient(180deg,#ffe09a,#dba945)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--fg-2)}
+.btn.sm{padding:6px 12px;font-size:13px;border-radius:9px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn.big{padding:15px 28px;font-size:17px}
+.icon-btn{width:38px;height:38px;border-radius:10px;display:inline-grid;place-items:center;color:var(--fg-2);font-size:19px}
+.icon-btn:hover{background:var(--panel-2);color:var(--fg)}
+input[type=text]{width:100%;background:rgba(8,7,20,.7);border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;font-size:18px;min-width:0}
+input[type=text]:focus{outline:2px solid var(--arc);outline-offset:0;border-color:transparent}
+.codein{text-align:center;letter-spacing:.35em;text-transform:uppercase;font-family:var(--display);font-weight:700;font-size:20px;max-width:200px}
+.av{width:var(--sz);height:var(--sz);border-radius:50%;display:inline-grid;place-items:center;flex:none;background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--c) 70%,white),var(--c));color:#0b0a18;border:2px solid rgba(255,255,255,.35)}
+.av svg{width:58%;height:58%;stroke-width:2}
+.sigs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sig{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;border-radius:14px;border:1px solid transparent;width:84px;font-size:13px;color:var(--fg-2)}
+.sig:hover{background:var(--panel-2)}
+.sig.on{border-color:var(--gold);background:rgba(242,180,65,.1);color:var(--gold-2)}
+.intro-card{width:min(440px,100%);display:flex;flex-direction:column;gap:18px;text-align:left}
+.menu-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+.hero{display:flex;gap:16px;align-items:center}
+.hero .nm{font-family:var(--display);font-size:24px;font-weight:700;color:var(--gold-2);overflow-wrap:anywhere}
+.xp{height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:8px}
+.xp i{display:block;height:100%;background:linear-gradient(90deg,var(--arc),var(--vio));border-radius:99px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:700;background:rgba(255,255,255,.08);color:var(--fg-2)}
+.chip.ok{background:var(--good-bg);color:var(--good)}.chip.warn{background:rgba(242,144,95,.16);color:var(--ember)}
+.opt-btns{display:grid;gap:12px}
+.code-box{font-family:var(--display);font-weight:900;font-size:clamp(34px,8vw,56px);letter-spacing:.22em;color:var(--gold-2);text-shadow:0 0 20px rgba(242,180,65,.4);margin-right:-.22em}
+.players{display:flex;flex-direction:column;gap:8px}
+.pl{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);min-width:0}
+.pl .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.pl.me{border:1px solid var(--line-2)}
+.pl .sc{font-family:var(--display);font-weight:700;color:var(--gold-2);font-variant-numeric:tabular-nums}
+.pl.done .nm::after{content:" ✓";color:var(--good)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{padding:14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:6px;text-align:left}
+.mode b{font-family:var(--display);font-size:16px;display:flex;gap:8px;align-items:center}
+.mode span{font-size:14px;color:var(--fg-2)}
+.mode.on{border-color:var(--gold);background:rgba(242,180,65,.1)}
+.mode[disabled]{pointer-events:none}
+.tps{display:flex;flex-wrap:wrap;gap:8px}
+.tp{padding:6px 12px;border-radius:99px;border:1px solid var(--line);font-size:14px;font-weight:700;color:var(--fg-3);display:inline-flex;gap:7px;align-items:center}
+.tp i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.tp.on{color:var(--fg);border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.tp[disabled]{pointer-events:none}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.seg button{padding:7px 14px;font-weight:700;font-size:14px;color:var(--fg-2)}
+.seg button.on{background:rgba(242,180,65,.18);color:var(--gold-2)}
+.seg[disabled] button{pointer-events:none}
+/* Ladebildschirm */
+.ring{width:130px;height:130px;position:relative;margin:6px auto 0}
+.ring i{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:var(--gold);border-right-color:rgba(242,180,65,.3);animation:spin 2.4s linear infinite}
+.ring i:nth-child(2){inset:14px;border-top-color:var(--arc);border-right-color:rgba(134,182,255,.3);animation-duration:1.7s;animation-direction:reverse}
+.ring i:nth-child(3){inset:30px;border-top-color:var(--vio);border-right-color:rgba(255,107,107,.3);animation-duration:1.2s}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:40px;color:var(--gold-2);animation:pulse 2.4s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.55;transform:scale(.92)}}
+.tipbox{max-width:560px;min-height:118px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center}
+.tipbox p{font-size:20px;line-height:1.4;animation:rise .5s ease both}
+.prog{width:min(420px,80vw);height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--arc));transition:width .4s linear}
+/* Spiel */
+.game{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}
+.hud{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.nodes{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.node{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--fg-3)}
+.node.now{border-color:var(--gold);color:var(--gold-2);box-shadow:0 0 12px rgba(242,180,65,.5)}
+.node.past{background:rgba(134,182,255,.2);border-color:var(--arc);color:var(--arc)}
+.node.boss{width:30px;height:30px;border-radius:9px;font-size:15px}
+.timer{flex:1;min-width:120px;height:10px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--arc),var(--gold));border-radius:99px}
+.timer.low i{background:var(--bad)}
+.tsec{font-family:var(--display);font-weight:700;font-size:18px;min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.qcard{display:flex;flex-direction:column;gap:16px}
+.qtag{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qtext{font-family:var(--display);font-weight:500;font-size:clamp(19px,3vw,25px);line-height:1.35;color:var(--fg);text-wrap:balance}
+.story{font-style:italic;color:var(--arc);font-size:16px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opts.one{grid-template-columns:1fr}
+.opt{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.04);font-size:17px;min-width:0;overflow-wrap:anywhere;transition:border-color .15s,background .15s,transform .15s}
+.opt:hover{border-color:var(--gold);background:rgba(242,180,65,.08);transform:translateY(-1px)}
+.opt .k{font-family:var(--display);font-weight:700;color:var(--gold);width:22px;flex:none}
+.opt.sel{border-color:var(--gold);background:rgba(242,180,65,.14)}
+.opt.ok{border-color:var(--good);background:var(--good-bg)}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt.dim{opacity:.55}
+.opt.lock{pointer-events:none}
+.opt .dots{position:absolute;right:8px;top:-12px;display:flex}
+.opt .dots .av{margin-left:-6px;border-color:var(--bg)}
+.tag{margin-left:auto;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.tag.me{background:rgba(242,180,65,.2);color:var(--gold-2)}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 18px}
+.pair .opt{align-items:center}
+.pair .lt{font-family:var(--display);font-weight:900;width:24px;height:24px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:inline-grid;place-items:center;font-size:13px;flex:none}
+.slot{margin-left:auto;font-family:var(--display);font-weight:900;color:var(--gold-2)}
+.expl{padding:14px 16px;border-radius:14px;background:rgba(134,182,255,.08);border:1px solid rgba(134,182,255,.3);color:var(--fg)}
+.expl b{color:var(--arc);font-family:var(--display);letter-spacing:.06em}
+.banner{display:flex;gap:12px;align-items:center;padding:12px 16px;border-radius:14px;font-family:var(--display);font-weight:700}
+.banner.good{background:var(--good-bg);color:var(--good);border:1px solid var(--good)}
+.banner.bad{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad)}
+.banner.neutral{background:rgba(255,255,255,.06);color:var(--fg-2);border:1px solid var(--line)}
+.flames{display:flex;gap:4px;font-size:22px;color:var(--ember)}
+.flames .off{color:rgba(255,255,255,.18)}
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:12px}
+.boss-case{border:1px solid var(--gold);background:linear-gradient(180deg,rgba(242,180,65,.12),rgba(242,180,65,.03));border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.boss-case h3{font-family:var(--display);color:var(--gold-2);font-size:20px}
+.lens{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+.lens h4{margin:0;font-family:var(--display);font-size:15px;letter-spacing:.06em;color:var(--arc);display:flex;align-items:center;gap:8px}
+.lens .opt{padding:10px 12px;font-size:16px}
+.votes{display:flex;gap:10px;flex-wrap:wrap}
+.votes .opt{flex:1 1 180px}
+.vbar{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px}.vbar i{display:block;height:100%;background:var(--vio)}
+.podium{display:flex;gap:14px;align-items:flex-end;justify-content:center;flex-wrap:wrap;margin:6px 0}
+.pod{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.05);min-width:120px;border:1px solid var(--line)}
+.pod.first{border-color:var(--gold);background:rgba(242,180,65,.12);transform:translateY(-12px)}
+.pod .rk{font-family:var(--display);font-weight:900;font-size:26px;color:var(--gold-2)}
+.gain{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.badge{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.badge.off{opacity:.4;filter:grayscale(1)}
+.badge .bi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(242,180,65,.16);color:var(--gold-2);font-size:21px;flex:none}
+.badge small{display:block;color:var(--fg-2);font-size:14px;line-height:1.25}
+/* Overlay & Buch */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(5,4,14,.78);display:grid;place-items:center;padding:max(14px,env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));animation:fade .25s ease both}
+@keyframes fade{from{opacity:0}}
+.book{width:min(920px,100%);max-height:100%;display:grid;grid-template-columns:210px minmax(0,1fr);border-radius:16px;overflow:hidden;border:1px solid var(--gold);background:#16122f;box-shadow:0 0 60px rgba(242,180,65,.2)}
+.toc{background:#0f0c24;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.toc button{padding:9px 10px;border-radius:9px;font-size:15px;color:var(--fg-2);line-height:1.25}
+.toc button:hover{background:var(--panel-2)}.toc button.on{background:rgba(242,180,65,.16);color:var(--gold-2);font-weight:700}
+.page{padding:22px 26px 26px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;max-height:min(80dvh,720px);animation:rise .35s ease both}
+.page h2{font-family:var(--display);color:var(--gold-2);font-size:26px;line-height:1.15}
+.page h3{font-family:var(--display);font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--arc)}
+.page ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.page .q{border-left:3px solid var(--gold);padding:6px 14px;font-style:italic;color:var(--gold-2);background:rgba(242,180,65,.07);border-radius:0 10px 10px 0}
+.page table{width:100%;border-collapse:collapse;font-size:15px;min-width:560px}
+.page th,.page td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+.page th{background:rgba(255,255,255,.06);font-family:var(--display);font-size:13px;color:var(--gold-2)}
+.scrollx{overflow-x:auto;max-width:100%}
+.bhead{display:flex;align-items:center;gap:10px;grid-column:1/-1;padding:10px 14px;background:#0b091d;border-bottom:1px solid var(--line)}
+.dlg{width:min(560px,100%);display:flex;flex-direction:column;gap:14px;max-height:100%;overflow-y:auto}
+.toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;background:#241d52;border:1px solid var(--gold);color:var(--fg);padding:10px 18px;border-radius:12px;max-width:min(520px,calc(100vw - 32px));box-shadow:0 8px 30px rgba(0,0,0,.5);animation:rise .3s ease both}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@media (max-width:900px){.game{grid-template-columns:minmax(0,1fr)}.side{position:static}.menu-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){
+  body{font-size:16px}
+  .opts{grid-template-columns:1fr}.pair{gap:8px}.modes{grid-template-columns:1fr}
+  .book{grid-template-columns:minmax(0,1fr);max-height:100%;overflow-y:auto}
+  .toc{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}.toc button{white-space:nowrap}
+  .page{max-height:none;padding:18px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
+
+/* Eingabe, Szene, Bewertung */
+.blank{display:inline-block;width:auto;min-width:120px;max-width:100%;padding:5px 10px;margin:0 4px;border-radius:9px;font-size:17px;background:rgba(5,8,20,.75);border:1.5px solid var(--line-2);border-bottom:3px solid var(--gold)}
+.blank.ok{border-color:var(--good);background:var(--good-bg)}.blank.half{border-color:var(--ember)}.blank.bad{border-color:var(--bad);background:var(--bad-bg)}
+.gaptext{font-size:clamp(18px,2.6vw,22px);line-height:2.3;overflow-wrap:anywhere}
+textarea.free,input.blank{font-family:inherit}
+textarea.free{width:100%;min-height:92px;resize:vertical;background:rgba(5,8,20,.75);border:1.5px solid var(--line-2);border-radius:12px;padding:12px 14px;font-size:17px;line-height:1.5}
+textarea.free:focus,input.blank:focus{outline:2px solid var(--arc);outline-offset:0}
+.de{font-family:var(--display);font-size:clamp(19px,3vw,24px);color:var(--fg)}
+.words{display:flex;flex-wrap:wrap;gap:8px}
+.word{padding:8px 14px;border-radius:10px;border:1.5px solid var(--line-2);background:rgba(255,255,255,.05);font-size:17px}
+.word:hover{border-color:var(--gold)}.word.used{opacity:.3;pointer-events:none}
+.built{min-height:52px;padding:10px 14px;border-radius:12px;border:1.5px dashed var(--line-2);font-size:19px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.built .word{background:rgba(242,180,65,.15);border-color:var(--gold)}
+.scene{border-radius:14px;overflow:hidden;border:1px solid var(--gold);background:#000}
+.scene svg{display:block;width:100%;height:auto}
+.cityline{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--fg-2)}
+.cityline b{font-family:var(--display);color:var(--gold-2);font-size:18px}
+.clue{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:rgba(242,180,65,.1);border:1px solid var(--gold);color:var(--gold-2)}
+.rulecard{padding:12px 14px;border-radius:12px;background:var(--paper);color:var(--paper-ink);font-size:15.5px}
+.rulecard b{font-family:var(--display)}
+.rubric{display:flex;flex-direction:column;gap:6px;font-size:15px}
+.rub{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:6px 10px;border-radius:9px;background:rgba(255,255,255,.04)}
+.rub.on{background:var(--good-bg)}.rub.off{background:var(--bad-bg)}
+.ptxt{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);font-size:15px;overflow-wrap:anywhere;white-space:pre-wrap}
+.model{padding:12px 14px;border-radius:12px;background:var(--paper);color:var(--paper-ink);font-size:15.5px;line-height:1.55}
+.sol{color:var(--good);font-weight:700}.mis{color:var(--bad)}
+.hintbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.opt.hid{visibility:hidden}
+.page .rule{background:var(--paper);color:var(--paper-ink);padding:10px 14px;border-radius:10px}
+.page .ex{color:var(--fg-2);font-size:15px}
+.page td b,.page li b{color:var(--gold-2)}
+.vocgrid{columns:2 240px;column-gap:24px}.vocgrid div{break-inside:avoid;padding:3px 0;border-bottom:1px solid var(--line);font-size:15px}
+@media (max-width:700px){.blank{min-width:90px}.gaptext{line-height:2.4}}
+</style>
+<canvas id="motes" aria-hidden="true"></canvas>
+<div class="wrap" id="app"><noscript><div class="panel" style="margin:40px auto;max-width:520px;text-align:center"><h2 class="h2">Skripte sind deaktiviert</h2><p>Diese Ansicht führt keine Programme aus (z. B. die Vorschau in Dateien-App, Mail oder Chat). Öffne die Datei in Safari/Chrome/Edge oder lade sie auf GitHub Pages hoch.</p></div></noscript></div>
+<div id="overlay"></div>
+<div id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var LS={get:function(k,d){try{var v=localStorage.getItem('fil-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem('fil-'+k,JSON.stringify(v))}catch(e){}}};
+function hash(s){s=String(s);var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,r){r=r||Math.random;var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+var IC={star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5l6.5-.5z',moon:'M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z',
+flame:'M12 3c1 4 5 5.5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z',shield:'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z',
+eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z',leaf:'M5 19C5 10 10 5 20 4c0 10-5 15-14 15zM5 19l8-8',
+book:'M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 21V5M9 7h6',swords:'M5 4l9 9M4 5l3 3M14 4l6 0 0 6-9 9M18 14l3 3M6 18l-3 3M9 15l-3 3',
+users:'M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M16 4.5a3.5 3.5 0 010 6.5M18 14.5c2.2.7 3.5 2.6 3.5 5',
+crown:'M3 8l4 4 5-7 5 7 4-4-2 11H5z',copy:'M9 9h11v11H9zM5 15V4h11',x:'M6 6l12 12M18 6L6 18',check:'M5 12.5l4.5 4.5L19 7.5',door:'M6 21V4h12v17M3 21h18M14 12h.01',
+award:'M12 15a6 6 0 100-12 6 6 0 000 12zM8.5 14L7 21l5-3 5 3-1.5-7',user:'M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 3.6-7 8-7s8 3 8 7',skull:'M12 3a8 8 0 00-5 14v3h10v-3a8 8 0 00-5-14zM9 12h.01M15 12h.01M10 17v3M14 17v3',
+scale:'M12 3v18M5 21h14M4 7h16M6 7l-3 7a3 3 0 006 0zM18 7l-3 7a3 3 0 006 0z',scroll:'M6 3h12v15a3 3 0 01-3 3H6a3 3 0 003-3V6a3 3 0 00-3-3zM10 8h5M10 12h5',
+map:'M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14',pen:'M4 20l4-1 11-11-3-3L5 16zM14 6l4 4',camera:'M4 8h4l2-3h4l2 3h4v11H4zM12 17a3.5 3.5 0 100-7 3.5 3.5 0 000 7z',
+key:'M7.5 15a4.5 4.5 0 110-9 4.5 4.5 0 010 9zM11 12h10M18 12v4M21 12v3',globe:'M12 21a9 9 0 100-18 9 9 0 000 18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18',
+bulb:'M9 18h6M10 21h4M12 3a6 6 0 00-3.5 11c.7.6 1 1.4 1 2h5c0-.6.3-1.4 1-2A6 6 0 0012 3z',tower:'M12 2l2 7h-4zM10 9l-3 13h10l-3-13M8.5 16h7',
+search:'M11 18a7 7 0 100-14 7 7 0 000 14zM21 21l-5-5',trophy:'M7 4h10v5a5 5 0 01-10 0zM7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M12 14v4M8 21h8'};
+function icon(n,s){return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"'+(s?' style="width:'+s+'px;height:'+s+'px"':'')+'><path d="'+(IC[n]||IC.star)+'"/></svg>'}
+var SIGILS=[{n:'Tour',c:'#86b6ff',g:'tower'},{n:'Loupe',c:'#f2b441',g:'search'},{n:'Plume',c:'#ff9f6e',g:'pen'},{n:'Boussole',c:'#5fd69a',g:'globe'},{n:'Clé',c:'#ff6b7d',g:'key'},{n:'Lanterne',c:'#c9a0ff',g:'bulb'}];
+var RANKS=[[0,'Touriste égaré(e)'],[150,'Apprenti(e) détective'],[400,'Guide local(e)'],[800,'Inspecteur(trice)'],[1500,'Commissaire'],[3000,'Maître de la Sûreté']];
+var ROLES=[{id:'det',n:'Détective',d:'Bis zu 3 Hinweise pro Runde (50:50 oder Anfangsbuchstaben).',i:'eye'},
+{id:'lin',n:'Linguiste',d:'+20 Punkte für jede fehlerfrei getippte Antwort.',i:'pen'},
+{id:'arc',n:'Archiviste',d:'Zu jeder Frage erscheint ein Regelkärtchen.',i:'book'},
+{id:'jou',n:'Journaliste',d:'Doppelter Tempobonus bei richtigen Antworten.',i:'scroll'},
+{id:'car',n:'Cartographe',d:'Doppelter Serienbonus für aufeinanderfolgende Treffer.',i:'map'},
+{id:'gar',n:'Gardien',d:'Der erste Fehler pro Runde unterbricht deine Serie nicht.',i:'shield'}];
+var TOPICS=[{id:'pc',n:'Passé composé',c:'#86b6ff'},{id:'im',n:'Imparfait',c:'#f2b441'},{id:'pq',n:'Plus-que-parfait',c:'#c9a0ff'},{id:'tp',n:'Les temps ensemble',c:'#ff9f6e'},
+{id:'inf',n:'Phrases à l’infinitif',c:'#5fd69a'},{id:'pd',n:'Personenbeschreibung',c:'#ff7ab0'},{id:'vo',n:'Vocabulaire',c:'#ffd98c'}];
+var ALLTP=TOPICS.map(function(t){return t.id});
+var TOP={};TOPICS.forEach(function(t){TOP[t.id]=t});
+var RULE={pc:'Passé composé = avoir/être (Präsens) + participe passé. Mit être: aller, venir, arriver, partir, entrer, sortir, rester, naître, mourir, monter, descendre, tomber, rentrer, retourner, devenir, revenir und alle reflexiven Verben. Bei être richtet sich das Partizip nach dem Subjekt.',
+im:'Imparfait: Stamm der nous-Form im Präsens (ohne -ons) + -ais, -ais, -ait, -ions, -iez, -aient. Nur être ist unregelmäßig: ét-. Für Beschreibungen, Gewohnheiten und Hintergrund.',
+pq:'Plus-que-parfait = imparfait von avoir/être + participe passé. Es zeigt, was VOR einer anderen Handlung in der Vergangenheit geschehen war.',
+tp:'Hintergrund und Gewohnheit: imparfait. Einzelne, abgeschlossene Handlung: passé composé. Vorzeitig: plus-que-parfait. Signalwörter helfen: soudain, un jour (pc); toujours, d’habitude (im); déjà, auparavant (pq).',
+inf:'pour + Inf. (Zweck) · sans + Inf. (ohne zu) · avant de + Inf. (bevor) · après avoir/être + participe passé (nachdem). Subjekt von Haupt- und Nebensatz muss dasselbe sein.',
+pd:'Haare: Elle a les cheveux longs et bruns. Kleidung: Il porte une veste bleue. Vermutung: Il semble/Elle doit être … Orte: au premier plan, à l’arrière-plan, à gauche, à droite.',
+vo:'Lerne Vokabeln mit Artikel (le/la/l’). Bei Verben auf Reflexivpronomen achten: s’en sortir, s’exprimer. Variante mit (e) = weibliche Form hat ein zusätzliches e.'};
+var CITIES=[{n:'Paris',f:'Die Seine fließt mitten durch die Hauptstadt, der Eiffelturm ist 330 m hoch.'},{n:'Lyon',f:'Lyon heißt „Hauptstadt der Gastronomie“ und liegt an Rhône und Saône.'},
+{n:'Marseille',f:'Die älteste Stadt Frankreichs wurde um 600 v. Chr. von Griechen gegründet.'},{n:'Bordeaux',f:'Weltbekannt für Wein; die Place de la Bourse spiegelt sich im „Miroir d’eau“.'},
+{n:'Strasbourg',f:'Sitz des Europäischen Parlaments, berühmt für Fachwerk und Weihnachtsmarkt.'},{n:'Nice',f:'Die Promenade des Anglais führt kilometerlang am Meer entlang.'},
+{n:'Lille',f:'Nahe an Belgien; die Grand’Place ist umgeben von flämischen Fassaden.'},{n:'Toulouse',f:'Wegen der roten Backsteinhäuser heißt sie „la ville rose“.'}];
+var THIEVES=[{n:'Madame Lefèvre',c:['Elle a les cheveux gris et courts.','Elle porte toujours un grand chapeau.','Elle parle avec un léger accent du Sud.','Elle déteste la pluie et prend le train.','Elle avait travaillé au musée avant la disparition.']},
+{n:'Monsieur Durand',c:['Il est grand et il porte une barbe.','Il s’habille toujours en noir.','Il lit le journal tous les matins au café.','Il avait quitté Paris la veille du vol.','Il laisse tomber des pièces de monnaie.']},
+{n:'Léa Marchand',c:['Elle a les cheveux longs et roux.','Elle porte des lunettes rondes.','Elle étudiait l’histoire de l’art.','Elle était déjà allée au Louvre trois fois.','Elle laisse un foulard rouge derrière elle.']},
+{n:'Hugo Bernard',c:['Il est jeune et il porte une casquette.','Il a toujours un sac à dos vert.','Il photographie tous les monuments.','Il avait réservé un billet pour Nice.','Il écoute de la musique en marchant.']},
+{n:'Camille Roux',c:['Elle a les yeux verts et les cheveux frisés.','Elle porte un long manteau violet.','Elle voyage avec un petit chien.','Elle avait changé de nom avant le départ.','Elle boit toujours un chocolat chaud.']},
+{n:'Théo Girard',c:['Il est petit et il a les cheveux blonds.','Il porte un béret et une écharpe.','Il joue de la guitare dans la rue.','Il avait perdu son passeport à Lyon.','Il mange des croissants au petit-déjeuner.']}];
+/* ---------- Fragenpool ---------- */
+var BANK=[],CNT={};
+function add(tp,ty,o){CNT[tp]=(CNT[tp]||0)+1;o.id=tp+CNT[tp];o.tp=tp;o.ty=ty;BANK.push(o)}
+function MC(tp,q,c,w,ex){add(tp,'mc',{q:q,c:c,w:w,ex:ex})}
+function TF(tp,q,a,ex){add(tp,'tf',{q:q,a:a,ex:ex})}
+function GP(tp,t,a,ex){add(tp,'gp',{t:t,a:a.map(function(x){return typeof x==='string'?[x]:x}),ex:ex})}
+function TR(tp,de,v,ex){add(tp,'tr',{q:de,a:v,ex:ex})}
+function MA(tp,q,pairs,ex){add(tp,'ma',{q:q,p:pairs,ex:ex})}
+function OR(tp,q,items,ex,alts){add(tp,'or',{q:q,items:items,alts:alts||[],ex:ex})}
+
+/* Passé composé */
+MC('pc','Welche Form ist richtig? „Hier, elle ___ au cinéma.“','est allée',['a allé','est allé','a allée'],'Aller bildet das passé composé mit être. Das Partizip richtet sich nach dem Subjekt: elle → allée.');
+MC('pc','Mit welchem Hilfsverb bildet „se lever“ das passé composé?','être',['avoir','beides ist möglich','gar keinem'],'Alle reflexiven Verben bilden die zusammengesetzten Zeiten mit être.');
+MC('pc','Wie lautet das participe passé von „prendre“?','pris',['prendu','prené','prit'],'Unregelmäßig: prendre → pris, comprendre → compris, apprendre → appris.');
+MC('pc','Welches dieser Verben bildet das passé composé mit être?','rester',['rire','finir','manger'],'Rester gehört zu den Verben der Bewegung bzw. des Zustandswechsels: rester, aller, venir, partir …');
+MC('pc','„Die Mädchen sind gestern nach Lyon gefahren.“','Les filles sont parties à Lyon hier.',['Les filles ont parti à Lyon hier.','Les filles sont parti à Lyon hier.','Les filles sont partis à Lyon hier.'],'Partir mit être; Subjekt feminin Plural → parties.');
+MC('pc','Welches Partizip ist korrekt? „Les photos que j’ai ___ sont belles.“','prises',['pris','prise','prisés'],'Bei avoir richtet sich das Partizip nach einem vorangestellten direkten Objekt (les photos → prises).');
+TF('pc','Das participe passé von „faire“ lautet „fait“.',true,'Faire → fait: Il a fait ses devoirs.');
+TF('pc','Bei Verben mit avoir richtet sich das Partizip immer nach dem Subjekt.',false,'Bei avoir bleibt das Partizip meist unverändert; nur ein vorangestelltes direktes Objekt löst die Angleichung aus.');
+TF('pc','Im Satz „Elle est née en 2009“ ist das Partizip korrekt angeglichen.',true,'Naître bildet das passé composé mit être: née (feminin).');
+GP('pc','Hier soir, nous {} (regarder) un film.',[['avons regardé']],'Regarder → avoir: nous avons regardé.');
+GP('pc','Marie {} (sortir) avec ses amis.',[['est sortie']],'Sortir mit être, Subjekt feminin → sortie.');
+GP('pc','Elles {} (se lever) à six heures.',[['se sont levées']],'Reflexiv: se sont levées, das Partizip passt sich an (elles).');
+GP('pc','Tu {} (voir) ce film hier ?',[['as vu']],'Voir → vu, mit avoir.');
+GP('pc','Il {} (ouvrir) la porte et il {} (entrer) dans la maison.',[['a ouvert'],['est entré']],'Ouvrir → avoir (ouvert), entrer → être (entré).');
+GP('pc','Les fleurs que tu m’as {} (offrir) sont magnifiques.',[['offertes']],'Vorangestelltes Objekt „les fleurs“ (feminin Plural) → offertes.');
+TR('pc','Wir haben gestern Fußball gespielt.',['Nous avons joué au football hier.','Hier, nous avons joué au football.','Nous avons joué au foot hier.','Hier, nous avons joué au foot.'],'Jouer à + Sportart, passé composé mit avoir.');
+TR('pc','Sie ist gestern Abend spät nach Hause gekommen.',['Elle est rentrée tard hier soir.','Hier soir, elle est rentrée tard.','Elle est rentrée tard à la maison hier soir.','Elle est arrivée tard à la maison hier soir.','Elle est rentrée à la maison tard hier soir.'],'Rentrer mit être: elle est rentrée.');
+MA('pc','Ordne Infinitiv und participe passé zu.',[['naître','né'],['mourir','mort'],['ouvrir','ouvert'],['mettre','mis']],'Merke: naître → né, mourir → mort, ouvrir → ouvert, mettre → mis.');
+OR('pc','Bilde den Satz: „Gestern sind wir ins Kino gegangen.“',['Hier','nous','sommes','allés','au','cinéma'],'Subjekt nous + sommes allés (Angleichung im Plural).',[['Nous','sommes','allés','au','cinéma','hier']]);
+/* Imparfait */
+MC('im','Wie lautet der imparfait von „faire“ in der nous-Form?','nous faisions',['nous fesions','nous faisons','nous ferions'],'Stamm von nous faisons → fais- + -ions.');
+MC('im','Wann benutzt man vor allem den imparfait?','Für Beschreibungen, Gewohnheiten und den Hintergrund in der Vergangenheit',['Nur für abgeschlossene Einzelhandlungen','Nur für Handlungen, die vor einer anderen geschahen','Für alles, was in der Zukunft liegt'],'Der imparfait malt den Hintergrund, das passé composé erzählt die Handlung.');
+MC('im','Welcher Satz beschreibt eine Gewohnheit in der Vergangenheit?','Chaque été, nous allions à la mer.',['Hier, nous sommes allés à la mer.','Soudain, il a ouvert la porte.','Un jour, elle a perdu ses clés.'],'Chaque été, tous les jours, souvent, d’habitude → imparfait.');
+MC('im','Wie lautet der imparfait von „être“ in der 3. Person Plural?','ils étaient',['ils sont été','ils étions','ils seraient'],'Être: j’étais, tu étais, il était, nous étions, vous étiez, ils étaient.');
+MC('im','Wie schreibt man „nous commencer“ im imparfait?','nous commencions',['nous commençions','nous commenceons','nous commensions'],'Vor -i- (-ions) braucht c keine Cedille. Nur vor a, o, u: je commençais.');
+TF('im','Die Signalwörter „souvent“, „toujours“ und „d’habitude“ deuten auf den imparfait.',true,'Sie drücken Wiederholung oder Dauer aus.');
+TF('im','Im imparfait gibt es für fast alle Verben unterschiedliche Endungen.',false,'Die Endungen sind immer gleich; nur der Stamm (nous-Form) wechselt, und être hat ét-.');
+GP('im','Nous {} (manger) souvent au restaurant.',[['mangions']],'Der Stamm mang- + -ions; vor -i- entfällt das e.');
+GP('im','Quand j’{} (être) petit, je {} (habiter) à Nice.',[['étais'],['habitais']],'Beide Verben beschreiben einen länger andauernden Zustand.');
+GP('im','Il {} (faire) beau et les enfants {} (jouer) dehors.',[['faisait'],['jouaient']],'Hintergrundbeschreibung: Wetter und Tätigkeit.');
+GP('im','Vous {} (finir) toujours très tard.',[['finissiez']],'finissons → finiss- + -iez.');
+TR('im','Als ich klein war, wohnten wir in Marseille.',['Quand j’étais petit, nous habitions à Marseille.','Quand j’étais petite, nous habitions à Marseille.','Nous habitions à Marseille quand j’étais petit.','Nous habitions à Marseille quand j’étais petite.','Quand j’étais enfant, nous habitions à Marseille.'],'Zwei Zustände in der Vergangenheit → zweimal imparfait.');
+TR('im','Jeden Sonntag besuchte meine Oma uns.',['Chaque dimanche, ma grand-mère nous rendait visite.','Tous les dimanches, ma grand-mère nous rendait visite.','Chaque dimanche, ma grand-mère venait nous voir.','Tous les dimanches, ma grand-mère venait nous voir.','Ma grand-mère nous rendait visite chaque dimanche.','Ma grand-mère venait nous voir chaque dimanche.'],'Wiederholte Handlung → imparfait.');
+MA('im','Ordne das Pronomen der imparfait-Endung zu.',[['je','-ais'],['nous','-ions'],['vous','-iez'],['ils','-aient']],'Die Endungen: -ais, -ais, -ait, -ions, -iez, -aient.');
+OR('im','Bilde den Satz: „Es regnete und die Kinder spielten drinnen.“',['Il','pleuvait','et','les','enfants','jouaient','dedans'],'Zwei gleichzeitige Hintergrundhandlungen im imparfait.',[['Il','pleuvait','et','les','enfants','jouaient','à','l’intérieur']]);
+/* Plus-que-parfait */
+MC('pq','Wie bildet man den plus-que-parfait?','imparfait von avoir/être + participe passé',['présent von avoir/être + participe passé','passé composé von avoir/être + Infinitiv','futur von avoir/être + participe passé'],'Beispiel: Il avait fini. – Elle était partie.');
+MC('pq','Wofür steht der plus-que-parfait?','Für etwas, das vor einer anderen Handlung in der Vergangenheit geschah',['Für Gewohnheiten','Für Pläne in der Zukunft','Für allgemeine Wahrheiten'],'Er ist die „Vorvergangenheit“.');
+MC('pq','Welche Form ist richtig? „Quand je suis arrivé, le film ___ déjà.“','avait commencé',['a commencé','commençait','a commencer'],'Das Beginnen liegt vor dem Ankommen → plus-que-parfait.');
+MC('pq','„Als wir ankamen, war der Zug schon abgefahren.“','Quand nous sommes arrivés, le train était déjà parti.',['Quand nous sommes arrivés, le train avait déjà parti.','Quand nous sommes arrivés, le train est déjà parti.','Quand nous sommes arrivés, le train partait déjà.'],'Partir mit être → était parti.');
+TF('pq','Reflexive Verben bilden den plus-que-parfait mit avoir.',false,'Reflexive Verben immer mit être: Elle s’était levée.');
+TF('pq','„Il avait mangé“ bedeutet: Er hatte gegessen.',true,'avait + participe passé = Plusquamperfekt.');
+GP('pq','Quand je suis arrivé, elle {} (partir) déjà.',[['était partie']],'Partir mit être; elle → partie.');
+GP('pq','Nous {} (finir) nos devoirs avant le dîner.',[['avions fini']],'Imparfait von avoir (avions) + fini.');
+GP('pq','Ils {} (se lever) tôt, donc ils étaient fatigués.',[['s’étaient levés']],'Reflexiv: s’étaient levés (Maskulin Plural).');
+GP('pq','Elle m’a dit qu’elle {} (perdre) son portable.',[['avait perdu']],'Indirekte Rede in der Vergangenheit → plus-que-parfait.');
+TR('pq','Er war schon gegangen, als ich ankam.',['Il était déjà parti quand je suis arrivé.','Il était déjà parti quand je suis arrivée.','Quand je suis arrivé, il était déjà parti.','Quand je suis arrivée, il était déjà parti.','Il était déjà parti lorsque je suis arrivé.','Il était déjà parti lorsque je suis arrivée.'],'Zwei Zeitebenen: était parti (davor) – suis arrivé (danach).');
+TR('pq','Wir hatten den Bus verpasst.',['Nous avions raté le bus.','Nous avions manqué le bus.'],'Verpassen: rater oder manquer, mit avoir.');
+MA('pq','Ordne die Form dem Namen der Zeit zu.',[['avait mangé','plus-que-parfait'],['a mangé','passé composé'],['mangeait','imparfait']],'Achte auf das Hilfsverb: Imparfait + Partizip = plus-que-parfait.');
+OR('pq','Bilde den Satz: „Sie hatte ihre Tasche vergessen.“',['Elle','avait','oublié','son','sac'],'avait + participe passé von oublier.',[['Elle','avait','oublié','sa','tasche']]);
+
+/* Les temps ensemble */
+MC('tp','Welcher Text ist korrekt? „Es war Nacht. Plötzlich hörte er ein Geräusch.“','Il faisait nuit. Soudain, il a entendu un bruit.',['Il a fait nuit. Soudain, il entendait un bruit.','Il faisait nuit. Soudain, il entendait un bruit.','Il avait fait nuit. Soudain, il a entendu un bruit.'],'Hintergrund → imparfait (faisait), plötzliche Handlung → passé composé (a entendu).');
+MC('tp','Welches Signalwort passt typischerweise zum passé composé?','soudain',['souvent','d’habitude','chaque jour'],'Soudain, un jour, tout à coup → einmaliges Ereignis.');
+MC('tp','Welches Signalwort deutet auf den plus-que-parfait?','auparavant',['tous les jours','pendant que','toujours'],'Auparavant, déjà, la veille → Vorzeitigkeit.');
+TF('tp','Beschreibungen von Wetter, Gefühlen und Alter stehen meist im imparfait.',true,'Il faisait froid. Elle était triste. Il avait dix ans.');
+TF('tp','Für eine einmalige, abgeschlossene Handlung im Vordergrund nimmt man den imparfait.',false,'Dafür nimmt man das passé composé.');
+GP('tp','Hier, il {} (pleuvoir) quand je {} (sortir).',[['pleuvait'],['suis sorti','suis sortie']],'Hintergrund: pleuvait; Ereignis: suis sorti(e).');
+GP('tp','Quand nous {} (arriver), le film {} (commencer) déjà.',[['sommes arrivés','sommes arrivées'],['avait commencé']],'Arriver mit être; commencer liegt davor → plus-que-parfait.');
+GP('tp','Je {} (lire) quand le téléphone {} (sonner).',[['lisais'],['a sonné']],'Laufende Handlung (imparfait) wird unterbrochen (passé composé).');
+GP('tp','Elle {} (être) fatiguée parce qu’elle {} (travailler) toute la nuit.',[['était'],['avait travaillé']],'Zustand: était; Vorzeitiges: avait travaillé.');
+GP('tp','D’abord, il {} (prendre) son café, puis il {} (partir).',[['a pris'],['est parti']],'Handlungsfolge → passé composé.');
+TR('tp','Es regnete, als wir ankamen.',['Il pleuvait quand nous sommes arrivés.','Il pleuvait quand nous sommes arrivées.','Il pleuvait lorsque nous sommes arrivés.','Quand nous sommes arrivés, il pleuvait.','Quand nous sommes arrivées, il pleuvait.'],'Hintergrund + Ereignis.');
+TR('tp','Er hatte Hunger, weil er nichts gegessen hatte.',['Il avait faim parce qu’il n’avait rien mangé.','Il avait faim car il n’avait rien mangé.'],'Avoir faim im imparfait; nichts gegessen = plus-que-parfait mit ne … rien.');
+MA('tp','Ordne Signalwort und Zeit zu.',[['soudain','passé composé'],['d’habitude','imparfait'],['la veille','plus-que-parfait'],['pendant que','imparfait']],'Signalwörter sind Wegweiser, aber prüfe immer den Sinn des Satzes.');
+OR('tp','Bilde den Satz: „Ich schlief, als das Telefon klingelte.“',['Je','dormais','quand','le','téléphone','a','sonné'],'Dauer (dormais) wird durch Ereignis (a sonné) unterbrochen.',[['Je','dormais','lorsque','le','téléphone','a','sonné']]);
+/* Phrases à l’infinitif */
+MC('inf','Welcher Satz ist richtig?','Il est parti sans dire au revoir.',['Il est parti sans disant au revoir.','Il est parti sans de dire au revoir.','Il est parti sans dit au revoir.'],'Nach sans steht direkt der Infinitiv.');
+MC('inf','Nach „avant de“ steht …','der Infinitiv',['das participe passé','das Gérondif','der Konditional'],'Avant de partir = bevor man geht. (Mit anderem Subjekt: avant que + subjonctif.)');
+MC('inf','Nach „après“ + Infinitiv braucht man …','avoir/être + participe passé',['nur den einfachen Infinitiv','das Gérondif','den imparfait'],'Après avoir mangé, après être sorti: die Handlung ist abgeschlossen.');
+MC('inf','Welcher Satz ist richtig?','Après être arrivée, elle a téléphoné.',['Après arriver, elle a téléphoné.','Après avoir arrivée, elle a téléphoné.','Après être arriver, elle a téléphoné.'],'Arriver → être; das Partizip passt sich an das Subjekt an (arrivée).');
+MC('inf','Was bedeutet „pour“ + Infinitiv?','um … zu (Zweck)',['ohne zu','bevor','nachdem'],'Il travaille pour réussir.');
+MC('inf','Welche Voraussetzung gilt für alle vier Infinitivkonstruktionen?','Beide Satzteile haben dasselbe Subjekt',['Der Satz steht immer im Präsens','Das Verb ist immer reflexiv','Es gibt immer ein Objekt'],'Bei verschiedenen Subjekten braucht man einen Nebensatz (avant que, après que, pour que …).');
+TF('inf','„Avant de partir“ bedeutet „nachdem man gegangen ist“.',false,'Avant de = bevor; nachdem = après avoir/être + participe.');
+TF('inf','„Après avoir mangé, nous sommes sortis“ ist korrekt.',true,'Manger → avoir; Hauptsatz im passé composé.');
+GP('inf','Il est sorti sans {} (dire) un mot.',[['dire']],'sans + Infinitiv.');
+GP('inf','Je lis un livre avant de {} (dormir).',[['dormir']],'avant de + Infinitiv.');
+GP('inf','Après {} (finir) ses devoirs, il est sorti.',[['avoir fini']],'après + avoir + participe passé.');
+GP('inf','Après {} (se réveiller), elle a pris sa douche.',[['s’être réveillée']],'Reflexiv: s’être + participe, angeglichen an elle.');
+GP('inf','Il travaille dur pour {} (réussir) son examen.',[['réussir']],'pour + Infinitiv = Zweck.');
+GP('inf','Avant de {} (sortir), j’ai fermé les fenêtres. Après {} (fermer) les fenêtres, je suis sorti.',[['sortir'],['avoir fermé']],'Vorher: avant de + Inf.; nachher: après avoir + participe.');
+TR('inf','Sie ist gegangen, ohne ein Wort zu sagen.',['Elle est partie sans dire un mot.','Elle est partie sans dire un seul mot.','Elle est partie sans un mot.','Elle est sortie sans dire un mot.'],'sans + Infinitiv.');
+TR('inf','Nachdem wir gegessen hatten, sind wir spazieren gegangen.',['Après avoir mangé, nous sommes allés nous promener.','Après avoir mangé, nous sommes allées nous promener.','Après avoir mangé, nous nous sommes promenés.','Après avoir mangé, nous nous sommes promenées.','Après avoir mangé, nous sommes allés faire une promenade.'],'Après avoir mangé + Hauptsatz im passé composé.');
+TR('inf','Ich lerne viel, um die Prüfung zu bestehen.',['J’apprends beaucoup pour réussir l’examen.','Je travaille beaucoup pour réussir l’examen.','Je révise beaucoup pour réussir l’examen.','J’apprends beaucoup pour réussir mon examen.','Je travaille beaucoup pour réussir mon examen.','Je révise beaucoup pour réussir mon examen.'],'pour + Infinitiv. Eine Prüfung bestehen = réussir un examen.');
+MA('inf','Ordne die Konstruktion ihrer Bedeutung zu.',[['pour + Infinitiv','Zweck: um … zu'],['sans + Infinitiv','ohne … zu'],['avant de + Infinitiv','bevor man …'],['après avoir/être + participe','nachdem man … hat']],'Die vier Bausteine für elegante Sätze.');
+OR('inf','Bilde den Satz: „Bevor er ging, rief er seine Mutter an.“',['Avant','de','partir','il','a','appelé','sa','mère'],'avant de + Infinitiv, dann passé composé.',[['Il','a','appelé','sa','mère','avant','de','partir']]);
+OR('inf','Bilde den Satz: „Nachdem sie gegessen hatte, ist sie gegangen.“',['Après','avoir','mangé','elle','est','partie'],'après avoir + participe, dann passé composé mit être.',[['Elle','est','partie','après','avoir','mangé']]);
+/* Personenbeschreibung */
+MC('pd','Wie sagt man „Sie hat lange braune Haare“?','Elle a les cheveux longs et bruns.',['Elle a des cheveux long et brun.','Elle est les cheveux longs bruns.','Elle a les cheveux longue et brune.'],'Cheveux ist Plural (maskulin): longs, bruns.');
+MC('pd','Welcher Ausdruck bedeutet „Brille“?','les lunettes',['les lentilles','les bijoux','les cheveux'],'Lunettes steht immer im Plural: Il porte des lunettes.');
+MC('pd','Wie heißen „Sommersprossen“?','les taches de rousseur',['les rides','les fossettes','les cicatrices'],'Les rides = Falten, les fossettes = Grübchen.');
+MC('pd','Was bedeutet „Il a l’air fatigué“?','Er sieht müde aus.',['Er will müde sein.','Er hat die Luft müde.','Er ist nicht müde.'],'avoir l’air + Adjektiv = aussehen, wirken.');
+MC('pd','Wie drückst du eine Vermutung zum Bild aus?','Elle doit être fatiguée. / Elle semble fatiguée.',['Elle fait fatiguée.','Elle est fatiguer.','Elle a fatiguée.'],'Devoir (müssen/dürfte) und sembler sind typische Vermutungsverben.');
+MC('pd','Wie sagt man „im Hintergrund“?','à l’arrière-plan',['au dernier plan','en arrière jour','derrière-plan'],'Au premier plan = im Vordergrund; à l’arrière-plan = im Hintergrund.');
+TF('pd','Farbadjektive wie „marron“ und „orange“ bleiben unverändert.',true,'Les yeux marron, une veste orange (nomen-abgeleitete Farben sind unveränderlich).');
+TF('pd','Man sagt: „Elle a les yeux bleu.“',false,'Richtig: les yeux bleus (Plural-s).');
+TF('pd','„Il porte des lunettes“ bedeutet „Er trägt eine Brille“.',true,'Porter = tragen (Kleidung, Brille, Bart …).');
+GP('pd','Elle a les cheveux {} (long) et {} (blond).',[['longs'],['blonds']],'Angleichung an cheveux (maskulin Plural).');
+GP('pd','Elle est {} (grand) et mince, elle a les yeux {} (vert).',[['grande'],['verts']],'Elle est grande; les yeux verts.');
+GP('pd','Sur la photo, on {} (voir) une jeune femme qui {} (porter) une robe rouge.',[['voit'],['porte']],'Typische Einleitung: Sur la photo, on voit …');
+GP('pd','Au premier {}, un garçon lit un livre.',[['plan']],'au premier plan = im Vordergrund.');
+TR('pd','Er trägt eine Brille und eine blaue Jacke.',['Il porte des lunettes et une veste bleue.','Il porte des lunettes et un blouson bleu.','Il porte une paire de lunettes et une veste bleue.','Il porte des lunettes et un manteau bleu.'],'Veste ist feminin: une veste bleue.');
+TR('pd','Auf dem Foto sieht man eine junge Frau mit langen roten Haaren.',['Sur la photo, on voit une jeune femme aux cheveux longs et roux.','Sur la photo, on voit une jeune femme avec de longs cheveux roux.','Sur la photo, on voit une jeune femme qui a les cheveux longs et roux.','Sur la photo, on voit une jeune femme aux longs cheveux roux.','Sur la photo, on voit une jeune femme aux cheveux roux et longs.','Sur la photo, on voit une jeune femme avec les cheveux longs et roux.'],'Roux (rothaarig) ist die übliche Haarfarbe für Rot.');
+MA('pd','Ordne Wortschatz und Übersetzung zu.',[['les rides','die Falten'],['les cheveux frisés','lockige Haare'],['la barbe','der Bart'],['la moustache','der Schnurrbart']],'Kleine Details machen eine Beschreibung lebendig.');
+MA('pd','Ordne die Eigenschaft ihrer Übersetzung zu.',[['sympathique','sympathisch'],['timide','schüchtern'],['généreux','großzügig'],['têtu','stur']],'Charakter beschreibt man mit Adjektiven – achte auf die Angleichung.');
+OR('pd','Bilde den Satz: „Sie hat blaue Augen und trägt einen Hut.“',['Elle','a','les','yeux','bleus','et','porte','un','chapeau'],'Les yeux bleus (Plural); porter + Kleidungsstück.');
+/* Vokabular aus deinen Anki-Karten (französische Seite ergänzt) */
+var VOC=[['die (Hochhaus-)Siedlung','la cité',['la cité','la cité HLM']],['die Vorstadt, der Vorort','la banlieue',['la banlieue']],['denn','car',['car']],
+['mit etw. konfrontiert sein','être confronté(e) à',['être confronté à','être confrontée à']],['die Arbeitslosigkeit','le chômage',['le chômage']],['die Staatsangehörigkeit','la nationalité',['la nationalité']],
+['gleichzeitig','en même temps',['en même temps']],['frustrierend','frustrant(e)',['frustrant','frustrante']],['deprimiert sein','être déprimé(e)',['être déprimé','être déprimée']],
+['Blödsinn machen','faire des bêtises',['faire des bêtises']],['abhängen, sich herumtreiben','traîner',['traîner']],['der Jugendclub','la maison des jeunes',['la maison des jeunes','le club de jeunes','le centre de jeunes']],
+['der Luxus','le luxe',['le luxe']],['nur, bloß','seulement',['seulement','uniquement']],['nichts mehr','ne … plus rien',['ne plus rien','ne … plus rien','plus rien']],['die Bande','la bande',['la bande']],
+['kriminell','criminel(le)',['criminel','criminelle']],['es schaffen','s’en sortir',['s’en sortir','y arriver','réussir']],['schulisch','scolaire',['scolaire']],['dank','grâce à',['grâce à']],
+['eine Prüfung ablegen','passer un examen',['passer un examen','passer une épreuve']],['das Zeugnis','le bulletin',['le bulletin','le bulletin scolaire']],['die Uni','l’université',['l’université','la fac']],
+['ausschließen','exclure',['exclure']],['die Art und Weise','la façon',['la façon','la manière']],['im Augenblick','en ce moment',['en ce moment','actuellement','à présent']],['die Straßenumfrage','le micro-trottoir',['le micro-trottoir','le micro trottoir']],
+['der Aufstand','la révolte',['la révolte','l’émeute','les émeutes']],['fliehen','fuir',['fuir']],['sterben','mourir',['mourir']],['diskriminiert werden','être discriminé(e)',['être discriminé','être discriminée']],
+['sich äußern','s’exprimer',['s’exprimer']],['die Medien','les médias',['les médias']],['das Ereignis','l’événement',['l’événement','l’évènement']],['die Regierung','le gouvernement',['le gouvernement']],
+['verbessern','améliorer',['améliorer']],['die Bedingung','la condition',['la condition']],['sich entwickeln','évoluer',['évoluer','se développer']],['familiär','familial(e)',['familial','familiale']],
+['jede/r/s zweite','un(e) sur deux',['un sur deux','une sur deux']],['die Folge','la conséquence',['la conséquence']],['die Quote','le taux',['le taux']],['das Jobcenter','Pôle emploi',['Pôle emploi','France Travail']],
+['verdächtig','suspect(e)',['suspect','suspecte']],['schwören','jurer',['jurer']],['der Osten','l’est',['l’est']],['tot','mort(e)',['mort','morte']],['einen Ort betreten','entrer dans un lieu',['entrer dans un lieu','pénétrer dans un lieu','entrer dans un endroit']],
+['angeben','se vanter',['se vanter','frimer']],['nutzen, ausnutzen','profiter de',['profiter de','utiliser','exploiter']],['jdm einen Stempel aufdrücken','coller une étiquette à qqn',['coller une étiquette à qqn','coller une étiquette à quelqu’un','étiqueter']]];
+(function(){var n=VOC.length;
+  VOC.forEach(function(v,i){
+    TR('vo','Wie heißt auf Französisch: „'+v[0]+'“?',v[2],'Gelernt: '+v[0]+' = '+v[1]+'.');
+    var de=v[0].split(',')[0],w=[1,2,3].map(function(k){return VOC[(i+k*11+3)%n][0].split(',')[0]}).filter(function(x,j,a){return x!==de&&a.indexOf(x)===j});
+    while(w.length<3)w.push(VOC[(i+w.length*5+7)%n][0].split(',')[0]);
+    MC('vo','Was bedeutet „'+v[1]+'“?',de,w.slice(0,3),v[1]+' = '+v[0]+'.')});
+  for(var g=0;g<n-3;g+=4){var ps=[];for(var k=0;k<4;k++){var e=VOC[g+k];ps.push([e[1],e[0].split(',')[0]])}MA('vo','Ordne Französisch und Deutsch zu.',ps,'Wiederhole diese Vokabeln im Buch unter „Banlieue-Wortschatz“.')}
+  GP('vo','Dans la {} (Vorstadt), il y a beaucoup de tours.',[['banlieue']],'la banlieue = Vorstadt.');
+  GP('vo','Il n’a pas de travail : le {} (Arbeitslosigkeit) est un grand problème.',[['chômage']],'le chômage = Arbeitslosigkeit.');
+  GP('vo','{} (Dank) son professeur, il a réussi son examen.',[['Grâce à']],'grâce à + Nomen.');
+  GP('vo','Les jeunes {} (abhängen) dans la rue.',[['traînent']],'traîner: ils traînent.');
+  GP('vo','Les {} (Medien) parlent de l’événement.',[['médias']],'les médias.');
+  GP('vo','Cette situation est {} (frustrierend).',[['frustrante']],'situation ist feminin → frustrante.')})();
+/* ---------- Bildszenen für den Boss ---------- */
+var SC=['#f1c9a0','#e0a982','#c68863','#8d5a3b'];
+function fig(x,y,p){var s='',sk=p.sk||SC[0],h=p.hc,L=p.hl;
+  s+='<rect x="'+(x-14)+'" y="'+(y-62)+'" width="12" height="62" rx="4" fill="'+(p.bc||'#334')+'"/><rect x="'+(x+2)+'" y="'+(y-62)+'" width="12" height="62" rx="4" fill="'+(p.bc||'#334')+'"/>';
+  s+='<rect x="'+(x-19)+'" y="'+(y-124)+'" width="38" height="68" rx="9" fill="'+p.tc+'"/>';
+  if(p.dress)s+='<path d="M'+(x-19)+','+(y-100)+'L'+(x+19)+','+(y-100)+'L'+(x+28)+','+(y-40)+'L'+(x-28)+','+(y-40)+'z" fill="'+p.tc+'"/>';
+  s+='<rect x="'+(x-31)+'" y="'+(y-120)+'" width="11" height="48" rx="5" fill="'+p.tc+'"/><rect x="'+(x+20)+'" y="'+(y-120)+'" width="11" height="48" rx="5" fill="'+p.tc+'"/><circle cx="'+(x-25)+'" cy="'+(y-70)+'" r="6" fill="'+sk+'"/><circle cx="'+(x+25)+'" cy="'+(y-70)+'" r="6" fill="'+sk+'"/>';
+  if(L==='long'||L==='tresse')s+='<rect x="'+(x-22)+'" y="'+(y-160)+'" width="44" height="52" rx="14" fill="'+h+'"/>';
+  s+='<circle cx="'+x+'" cy="'+(y-142)+'" r="20" fill="'+sk+'"/>';
+  if(L==='frise'){for(var a=0;a<9;a++){var t=Math.PI+a*Math.PI/8;s+='<circle cx="'+(x+Math.cos(t)*21).toFixed(1)+'" cy="'+(y-142+Math.sin(t)*21).toFixed(1)+'" r="8" fill="'+h+'"/>'}}
+  else s+='<path d="M'+(x-21)+','+(y-144)+'a21,21 0 0 1 42,0q-21,-14 -42,0z" fill="'+h+'"/>';
+  if(L==='long'||L==='tresse')s+='<path d="M'+(x-21)+','+(y-144)+'a21,21 0 0 1 42,0l-4,16q-3,-18 -17,-18t-17,18z" fill="'+h+'"/>';
+  s+='<circle cx="'+(x-7)+'" cy="'+(y-141)+'" r="2.2" fill="#222"/><circle cx="'+(x+7)+'" cy="'+(y-141)+'" r="2.2" fill="#222"/><path d="M'+(x-6)+','+(y-132)+'q6,5 12,0" stroke="#7a3b2e" stroke-width="2" fill="none"/>';
+  if(p.beard)s+='<path d="M'+(x-15)+','+(y-136)+'q15,34 30,0q-6,10 -15,10t-15,-10z" fill="'+h+'"/>';
+  if(p.gl)s+='<circle cx="'+(x-8)+'" cy="'+(y-141)+'" r="6.5" fill="none" stroke="#111" stroke-width="2"/><circle cx="'+(x+8)+'" cy="'+(y-141)+'" r="6.5" fill="none" stroke="#111" stroke-width="2"/><path d="M'+(x-1.5)+','+(y-141)+'h3" stroke="#111" stroke-width="2"/>';
+  if(p.hat==='chapeau')s+='<ellipse cx="'+x+'" cy="'+(y-158)+'" rx="30" ry="6" fill="'+p.hcol+'"/><rect x="'+(x-16)+'" y="'+(y-180)+'" width="32" height="24" rx="5" fill="'+p.hcol+'"/>';
+  if(p.hat==='casquette')s+='<path d="M'+(x-21)+','+(y-150)+'a21,18 0 0 1 42,0z" fill="'+p.hcol+'"/><rect x="'+(x+4)+'" y="'+(y-152)+'" width="28" height="6" rx="3" fill="'+p.hcol+'"/>';
+  if(p.hat==='bonnet')s+='<path d="M'+(x-22)+','+(y-148)+'a22,22 0 0 1 44,0z" fill="'+p.hcol+'"/><circle cx="'+x+'" cy="'+(y-171)+'" r="6" fill="'+p.hcol+'"/>';
+  if(p.hat==='beret')s+='<ellipse cx="'+(x+4)+'" cy="'+(y-160)+'" rx="26" ry="9" fill="'+p.hcol+'"/>';
+  if(p.it)s+=p.it(x,y);return s}
+var IT={journal:function(x,y){return '<rect x="'+(x-20)+'" y="'+(y-96)+'" width="40" height="28" rx="3" fill="#f4f1e6" transform="rotate(-8 '+x+' '+(y-82)+')"/><path d="M'+(x-14)+','+(y-90)+'h26M'+(x-14)+','+(y-84)+'h26M'+(x-14)+','+(y-78)+'h18" stroke="#999" stroke-width="2"/>'},
+ tasse:function(x,y){return '<rect x="'+(x+26)+'" y="'+(y-86)+'" width="16" height="16" rx="3" fill="#fff"/><path d="M'+(x+42)+','+(y-82)+'q8,3 0,9" stroke="#fff" stroke-width="3" fill="none"/>'},
+ photo:function(x,y){return '<rect x="'+(x-16)+'" y="'+(y-154)+'" width="32" height="22" rx="4" fill="#222"/><circle cx="'+x+'" cy="'+(y-143)+'" r="7" fill="#789"/>'},
+ filet:function(x,y){return '<path d="M'+(x+22)+','+(y-70)+'l30,40h-60z" fill="none" stroke="#c9a46a" stroke-width="2"/><path d="M'+(x+10)+','+(y-50)+'h30M'+(x+4)+','+(y-38)+'h40M'+(x+22)+','+(y-70)+'v40" stroke="#c9a46a" stroke-width="1.5"/>'},
+ glace:function(x,y){return '<path d="M'+(x+25)+','+(y-70)+'l-6,-26h12z" fill="#d9a35c"/><circle cx="'+(x+25)+'" cy="'+(y-102)+'" r="11" fill="#ffb3c8"/>'},
+ sac:function(x,y){return '<rect x="'+(x-30)+'" y="'+(y-116)+'" width="14" height="40" rx="6" fill="#d9553c"/>'},
+ vin:function(x,y){return '<rect x="'+(x+24)+'" y="'+(y-88)+'" width="16" height="20" rx="3" fill="#8b2a3a"/><path d="M'+(x+40)+','+(y-82)+'q8,3 0,10" stroke="#8b2a3a" stroke-width="3" fill="none"/>'},
+ cadeaux:function(x,y){return '<rect x="'+(x+22)+'" y="'+(y-78)+'" width="24" height="20" fill="#e5484d"/><path d="M'+(x+34)+','+(y-78)+'v20M'+(x+22)+','+(y-68)+'h24" stroke="#ffd98c" stroke-width="3"/>'},
+ biscuits:function(x,y){return '<ellipse cx="'+(x+34)+'" cy="'+(y-68)+'" rx="18" ry="6" fill="#e3b777"/><circle cx="'+(x+28)+'" cy="'+(y-76)+'" r="5" fill="#c98a4b"/><circle cx="'+(x+40)+'" cy="'+(y-76)+'" r="5" fill="#c98a4b"/>'},
+ velo:function(x,y){return '<circle cx="'+(x-32)+'" cy="'+(y-16)+'" r="16" fill="none" stroke="#222" stroke-width="4"/><circle cx="'+(x+32)+'" cy="'+(y-16)+'" r="16" fill="none" stroke="#222" stroke-width="4"/><path d="M'+(x-32)+','+(y-16)+'L'+x+','+(y-40)+'L'+(x+32)+','+(y-16)+'" stroke="#222" stroke-width="4" fill="none"/>'},
+ chien:function(x,y){return '<ellipse cx="'+(x+48)+'" cy="'+(y-16)+'" rx="16" ry="10" fill="#b5834f"/><circle cx="'+(x+62)+'" cy="'+(y-24)+'" r="8" fill="#b5834f"/><path d="M'+(x+22)+','+(y-70)+'L'+(x+46)+','+(y-22)+'" stroke="#222" stroke-width="2"/>'},
+ casque:function(x,y){return '<path d="M'+(x-22)+','+(y-140)+'a22,22 0 0 1 44,0" fill="none" stroke="#222" stroke-width="5"/><rect x="'+(x-26)+'" y="'+(y-142)+'" width="9" height="16" rx="4" fill="#222"/><rect x="'+(x+17)+'" y="'+(y-142)+'" width="9" height="16" rx="4" fill="#222"/>'},
+ guitare:function(x,y){return '<ellipse cx="'+(x+4)+'" cy="'+(y-62)+'" rx="22" ry="16" fill="#b5651d"/><circle cx="'+(x+4)+'" cy="'+(y-62)+'" r="6" fill="#222"/><rect x="'+(x+22)+'" y="'+(y-116)+'" width="7" height="60" fill="#5a3716" transform="rotate(26 '+(x+22)+' '+(y-86)+')"/>'},
+ parapluie:function(x,y){return '<path d="M'+(x+26)+','+(y-150)+'a34,28 0 0 1 68,0z" fill="#3a6fc4" transform="translate(-34 0)"/><path d="M'+(x+26)+','+(y-150)+'V'+(y-72)+'" stroke="#222" stroke-width="3"/>'},
+ pigeons:function(x,y){return '<ellipse cx="'+(x+34)+'" cy="'+(y-8)+'" rx="11" ry="7" fill="#888"/><circle cx="'+(x+44)+'" cy="'+(y-14)+'" r="5" fill="#888"/><ellipse cx="'+(x+62)+'" cy="'+(y-6)+'" rx="10" ry="6" fill="#aaa"/><circle cx="'+(x+71)+'" cy="'+(y-11)+'" r="4.5" fill="#aaa"/>'},
+ ballon:function(x,y){return '<circle cx="'+(x+32)+'" cy="'+(y-12)+'" r="12" fill="#ffd34d" stroke="#333" stroke-width="2"/>'}};
+function PS(pos,d,o){o.pos=pos;o.d=d;return o}
+var SCENES=[
+{city:2-2,place:'Paris, devant un café',bg:'<defs><linearGradient id="s0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7c59f"/><stop offset="1" stop-color="#ffe9d2"/></linearGradient></defs><rect width="640" height="400" fill="url(#s0)"/><path d="M320 60l8 70h-16zM306 130l-18 150h64l-18-150zM300 200h40" fill="#5b5f73" opacity=".8" transform="translate(200 20) scale(.8)"/><rect x="0" y="120" width="140" height="240" fill="#e4d3c0"/><rect x="500" y="100" width="140" height="260" fill="#d9c7b0"/><path d="M0 120h140M500 100h140" stroke="#b9a78f" stroke-width="4"/><rect x="30" y="170" width="30" height="50" fill="#89a5c4"/><rect x="540" y="150" width="30" height="50" fill="#89a5c4"/><path d="M80 250h480v20H80z" fill="#c0392b"/><path d="M80 250l30 20 30-20 30 20 30-20 30 20 30-20 30 20 30-20 30 20 30-20 30 20 30-20 30 20 30-20 30 20" fill="#fff" opacity=".9"/><rect y="360" width="640" height="40" fill="#8a8d99"/><circle cx="230" cy="338" r="16" fill="#6a4a3a"/><rect x="226" y="338" width="8" height="22" fill="#6a4a3a"/>',
+ ps:[PS('à gauche','À gauche, une jeune femme aux cheveux longs et blonds lit un journal. Elle porte un pull rouge et des lunettes.',{x:120,sk:SC[0],hc:'#e8c76a',hl:'long',gl:1,tc:'#d63b3b',bc:'#355c9a',it:IT.journal,h:/blond/,t:/rouge/,a:/lunettes/,ac:/lit|lire|journal|lecture/,w:/femme|fille|jeune|dame|lectrice|madame|personne/}),
+  PS('au milieu','Au milieu, un homme âgé aux cheveux gris porte un chapeau et une veste verte. Il boit un café.',{x:320,sk:SC[1],hc:'#b9bcc4',hl:'court',hat:'chapeau',hcol:'#4a4036',tc:'#3f8c55',bc:'#6a5239',it:IT.tasse,h:/gris|blanc/,t:/vert/,a:/chapeau/,ac:/boit|boire|cafe|tasse|prend/,w:/homme|monsieur|age|vieux|grand-pere|personne|client/}),
+  PS('à droite','À droite, un garçon aux cheveux bruns et courts porte une casquette et un t-shirt jaune. Il prend une photo de la tour Eiffel.',{x:520,sk:SC[0],hc:'#5b3a22',hl:'court',hat:'casquette',hcol:'#2b4f9e',tc:'#f2c92e',bc:'#222',it:IT.photo,h:/brun|chatain|marron/,t:/jaune/,a:/casquette/,ac:/photo|photograph|appareil|prend/,w:/garcon|jeune|enfant|adolescent|touriste|personne/})],
+ B:'Le garçon avait pris le métro avant d’arriver au café. La jeune femme avait déjà commandé son thé.',C:'Le garçon prend une photo pour garder un souvenir de Paris.',L:'un café parisien avec la tour Eiffel'},
+{city:2,place:'Marseille, au Vieux-Port',bg:'<defs><linearGradient id="s1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ec1ff"/><stop offset="1" stop-color="#d8f1ff"/></linearGradient></defs><rect width="640" height="400" fill="url(#s1)"/><circle cx="540" cy="70" r="34" fill="#ffe27a"/><rect y="200" width="640" height="130" fill="#2f7fb5"/><path d="M80 200l40-80v80zM96 200h70l-30-44zM400 200l30-90v90zM420 200h60l-24-40z" fill="#fff"/><rect x="70" y="196" width="110" height="10" rx="4" fill="#7a4b2a"/><rect x="390" y="196" width="100" height="10" rx="4" fill="#7a4b2a"/><rect y="320" width="640" height="80" fill="#c9b79a"/><path d="M0 320h640" stroke="#a89678" stroke-width="5"/>',
+ ps:[PS('à gauche','À gauche, un pêcheur aux cheveux noirs porte un bonnet et un pull bleu. Il répare un filet.',{x:120,sk:SC[2],hc:'#1a1a1a',hl:'court',hat:'bonnet',hcol:'#c0392b',tc:'#2e6bb5',bc:'#5a5a60',it:IT.filet,h:/noir/,t:/bleu/,a:/bonnet/,ac:/repar|filet|peche|pecheur/,w:/homme|pecheur|monsieur|personne/}),
+  PS('au milieu','Au milieu, une femme aux longs cheveux roux et frisés mange une glace. Elle porte des lunettes de soleil et un t-shirt blanc.',{x:320,sk:SC[0],hc:'#c4561f',hl:'frise',gl:1,tc:'#f5f5f5',bc:'#e9893a',it:IT.glace,h:/roux|rousse/,t:/blanc/,a:/lunettes/,ac:/glace|mange|manger|deguste/,w:/femme|dame|touriste|madame|personne|jeune/}),
+  PS('à droite','À droite, une petite fille aux cheveux bruns porte une robe rose et un sac à dos. Elle joue avec un ballon.',{x:520,sk:SC[1],hc:'#4a2c17',hl:'tresse',dress:1,tc:'#f08ab4',bc:'#f08ab4',it:function(x,y){return IT.sac(x,y)+IT.ballon(x,y)},h:/brun|chatain|marron/,t:/rose/,a:/sac/,ac:/ballon|joue|jouer|court/,w:/fille|enfant|petite|gamine|personne/})],
+ B:'Le pêcheur avait quitté le port à cinq heures du matin. La petite fille était déjà allée à la plage.',C:'La femme mange une glace sans quitter les bateaux des yeux.',L:'le Vieux-Port de Marseille avec des bateaux'},
+{city:4,place:'Strasbourg, au marché de Noël',bg:'<defs><linearGradient id="s2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101a3d"/><stop offset="1" stop-color="#3c4a7d"/></linearGradient></defs><rect width="640" height="400" fill="url(#s2)"/><rect x="20" y="80" width="170" height="260" fill="#d8b98c"/><path d="M20 80l85-50 85 50z" fill="#7b3a2a"/><path d="M20 140h170M20 200h170M20 260h170M60 80v260M140 80v260M20 140l60 60M190 140l-60 60" stroke="#5b3a22" stroke-width="5"/><rect x="450" y="90" width="170" height="250" fill="#e6c9a0"/><path d="M450 90l85-55 85 55z" fill="#7b3a2a"/><path d="M450 150h170M450 210h170M450 270h170M510 90v250M570 90v250M450 150l60 60M620 150l-60 60" stroke="#5b3a22" stroke-width="5"/><rect x="215" y="230" width="210" height="40" fill="#b3282d"/><rect x="225" y="270" width="8" height="70" fill="#5b3a22"/><rect x="407" y="270" width="8" height="70" fill="#5b3a22"/><path d="M0 60q160 40 320 0t320 0" stroke="#ffe9a8" stroke-width="2" fill="none"/><circle cx="60" cy="75" r="5" fill="#ffd34d"/><circle cx="160" cy="88" r="5" fill="#ffd34d"/><circle cx="260" cy="76" r="5" fill="#ffd34d"/><circle cx="380" cy="76" r="5" fill="#ffd34d"/><circle cx="480" cy="88" r="5" fill="#ffd34d"/><circle cx="580" cy="75" r="5" fill="#ffd34d"/><rect y="340" width="640" height="60" fill="#e8eef7"/>',
+ ps:[PS('à gauche','À gauche, une femme aux cheveux noirs porte un bonnet rouge et un manteau vert. Elle boit un vin chaud.',{x:110,sk:SC[0],hc:'#161616',hl:'long',hat:'bonnet',hcol:'#d63b3b',tc:'#2f7d4f',bc:'#2c2c35',it:IT.vin,h:/noir/,t:/vert/,a:/bonnet/,ac:/boit|boire|vin|chaud/,w:/femme|dame|madame|personne|jeune/}),
+  PS('au milieu','Au milieu, un homme blond avec des lunettes et un manteau orange achète des cadeaux.',{x:320,sk:SC[0],hc:'#e8c76a',hl:'court',gl:1,tc:'#ef8a2b',bc:'#2c2c35',it:IT.cadeaux,h:/blond/,t:/orange/,a:/lunettes/,ac:/achet|cadeau|offre/,w:/homme|monsieur|client|personne|touriste/}),
+  PS('à droite','À droite, un vendeur aux cheveux bruns et frisés porte un bonnet et un pull violet. Il vend des biscuits.',{x:540,sk:SC[2],hc:'#4a2c17',hl:'frise',hat:'bonnet',hcol:'#f2f2f2',tc:'#7b4bb5',bc:'#2c2c35',it:IT.biscuits,h:/brun|chatain|marron/,t:/violet/,a:/bonnet/,ac:/vend|biscuit|stand|marchand/,w:/vendeur|homme|marchand|garcon|jeune|personne/})],
+ B:'La femme avait acheté du vin chaud avant de rejoindre ses amis. L’homme était arrivé au marché avant la nuit.',C:'Après avoir acheté des biscuits, il les offre à ses enfants.',L:'le marché de Noël de Strasbourg le soir'},
+{city:5,place:'Nice, sur la promenade',bg:'<defs><linearGradient id="s3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58b8ff"/><stop offset="1" stop-color="#c8ecff"/></linearGradient></defs><rect width="640" height="400" fill="url(#s3)"/><circle cx="90" cy="70" r="36" fill="#fff3a3"/><rect y="170" width="640" height="130" fill="#1d8fd1"/><path d="M0 220q40-10 80 0t80 0 80 0 80 0 80 0 80 0 80 0 80 0" stroke="#7fd0ff" stroke-width="4" fill="none"/><rect y="300" width="640" height="100" fill="#e0c9a0"/><path d="M0 300h640" stroke="#b79a6c" stroke-width="5"/><g stroke="#6b4a2a" stroke-width="10" fill="none"><path d="M70 330Q80 250 90 200"/><path d="M560 330Q550 250 540 190"/></g><g fill="#2f9d58"><path d="M90 200q-50-10-70 20q40-20 70-20zM90 200q50-10 70 20q-40-20-70-20zM90 200q-20-45-50-40q35 5 50 40zM90 200q20-45 50-40q-35 5-50 40z"/><path d="M540 190q-50-10-70 20q40-20 70-20zM540 190q50-10 70 20q-40-20-70-20zM540 190q-20-45-50-40q35 5 50 40zM540 190q20-45 50-40q-35 5-50 40z"/></g>',
+ ps:[PS('à gauche','À gauche, un homme aux cheveux roux porte des lunettes de soleil et un t-shirt jaune. Il fait du vélo.',{x:130,sk:SC[0],hc:'#c4561f',hl:'court',gl:1,tc:'#f2c92e',bc:'#2b4f9e',it:IT.velo,h:/roux|rousse/,t:/jaune/,a:/lunettes/,ac:/velo|bicyclette|roule|pedal/,w:/homme|monsieur|cycliste|personne|jeune/}),
+  PS('au milieu','Au milieu, une femme âgée aux cheveux gris porte un chapeau de soleil et une robe rose. Elle se promène avec son chien.',{x:320,sk:SC[1],hc:'#c9ccd3',hl:'court',hat:'chapeau',hcol:'#e8d8a0',dress:1,tc:'#f08ab4',bc:'#f08ab4',it:IT.chien,h:/gris|blanc/,t:/rose/,a:/chapeau/,ac:/promen|chien|marche|balade/,w:/femme|dame|madame|age|vieille|grand-mere|personne/}),
+  PS('à droite','À droite, une adolescente aux cheveux longs et noirs écoute de la musique avec un casque. Elle porte un t-shirt blanc.',{x:510,sk:SC[2],hc:'#161616',hl:'long',tc:'#f5f5f5',bc:'#2b4f9e',it:IT.casque,h:/noir/,t:/blanc/,a:/casque|ecouteur/,ac:/ecout|musique|danse|chante/,w:/adolescente|fille|jeune|ado|personne|femme/})],
+ B:'Le cycliste avait loué son vélo avant de partir. La femme était sortie de son hôtel après le petit-déjeuner.',C:'L’adolescente met son casque pour écouter de la musique.',L:'la promenade des Anglais à Nice'},
+{city:1,place:'Lyon, sur une place',bg:'<defs><linearGradient id="s4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fb0c9"/><stop offset="1" stop-color="#dfe6f0"/></linearGradient></defs><rect width="640" height="400" fill="url(#s4)"/><rect x="0" y="90" width="150" height="270" fill="#e8b97a"/><rect x="150" y="130" width="130" height="230" fill="#d9825b"/><rect x="360" y="110" width="130" height="250" fill="#f0d08a"/><rect x="490" y="80" width="150" height="280" fill="#c97b84"/><g fill="#6b7f9e"><rect x="20" y="120" width="26" height="40"/><rect x="70" y="120" width="26" height="40"/><rect x="20" y="200" width="26" height="40"/><rect x="70" y="200" width="26" height="40"/><rect x="170" y="160" width="26" height="40"/><rect x="220" y="160" width="26" height="40"/><rect x="380" y="140" width="26" height="40"/><rect x="430" y="140" width="26" height="40"/><rect x="520" y="110" width="26" height="40"/><rect x="580" y="110" width="26" height="40"/></g><rect x="290" y="190" width="60" height="170" fill="#c8c0b0"/><circle cx="320" cy="215" r="18" fill="#fff"/><path d="M320 215v-12M320 215l8 4" stroke="#222" stroke-width="3"/><path d="M290 190l30-40 30 40z" fill="#8a4b3a"/><rect y="340" width="640" height="60" fill="#b4b0a8"/><path d="M0 340h640" stroke="#8d8a82" stroke-width="4"/><path d="M80 300q30-30 60 0" stroke="#4a7ab5" stroke-width="3" fill="none" opacity=".0"/>',
+ ps:[PS('à gauche','À gauche, un jeune homme aux cheveux bruns et à la barbe joue de la guitare. Il porte une veste grise.',{x:110,sk:SC[1],hc:'#3a2415',hl:'court',beard:1,tc:'#7d8794',bc:'#222',it:IT.guitare,h:/brun|chatain|marron/,t:/gris/,a:/barbe/,ac:/guitare|joue|musique|chante/,w:/homme|garcon|jeune|musicien|personne/}),
+  PS('au milieu','Au milieu, une femme blonde aux cheveux courts, avec des lunettes et une veste bleue, tient un parapluie.',{x:300,sk:SC[0],hc:'#e8c76a',hl:'court',gl:1,tc:'#2e6bb5',bc:'#2c2c35',it:IT.parapluie,h:/blond/,t:/bleu/,a:/lunettes/,ac:/parapluie|pluie|tient|attend/,w:/femme|dame|madame|personne|jeune/}),
+  PS('à droite','À droite, un vieil homme aux cheveux blancs porte un béret et un pull rouge. Il donne à manger aux pigeons.',{x:520,sk:SC[0],hc:'#eeeeee',hl:'court',hat:'beret',hcol:'#2b2b35',tc:'#d63b3b',bc:'#4a4036',it:IT.pigeons,h:/blanc|gris/,t:/rouge/,a:/beret|chapeau|casquette/,ac:/pigeon|donne|nourri|manger|oiseau/,w:/homme|monsieur|vieux|age|grand-pere|personne/})],
+ B:'Le jeune homme avait emporté sa guitare avant de venir sur la place. Il avait plu le matin.',C:'Le vieil homme donne du pain aux pigeons sans faire de bruit.',L:'une place de Lyon avec une horloge'}];
+function sceneSvg(i){var s=SCENES[i],h='<svg viewBox="0 0 640 400" role="img" aria-label="Bild: '+esc(s.place)+'">'+s.bg;s.ps.forEach(function(p){h+=fig(p.x,360,p)});return h+'</svg>'}
+/* ---------- Bewertung freier Texte ---------- */
+function norm(s){return String(s==null?'':s).toLowerCase().replace(/[’‘`´]/g,'\'').replace(/œ/g,'oe').replace(/[.,!?;:«»"“”()]/g,' ').replace(/\s+/g,' ').trim()}
+function noacc(s){return norm(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function noart(s){return s.replace(/^(le|la|les|l'|un|une|des|du) ?/,'')}
+function typedFr(u,vars){var a=norm(u),b=noacc(u),best=0;if(!a)return 0;
+  vars.forEach(function(v){var n=norm(v),m=noacc(v),f=0;
+    if(a===n)f=1;else if(b===m)f=.5;else if(noart(b)===noart(m))f=.5;
+    else{var x=b.split(' '),y=m.split(' '),c=0;x.forEach(function(w){if(y.indexOf(w)>=0)c++});var d=2*c/(x.length+y.length);if(d>=.7)f=.4*d}
+    if(f>best)best=f});return best}
+function gradeBoss(si,tx){var sc=SCENES[si],A=noacc(tx[0]||''),B=noacc(tx[1]||''),C=noacc(tx[2]||''),all=A+' '+B+' '+C,items=[],tot=0;
+  var per=sc.ps.map(function(p,k){var c=0,m=[];[['h',p.h],['t',p.t],['a',p.a],['ac',p.ac],['w',p.w]].forEach(function(r){if(r[1].test(A)){c++;m.push(r[0])}});return {k:k,c:c,m:m}});
+  per.sort(function(a,b){return b.c-a.c});var pp=per[0].c+per[1].c;
+  items.push(['Zwei Personen genau beschrieben (Haare, Kleidung, Zubehör, Tätigkeit, Person)',pp,10]);tot+=pp;
+  var loc=(A.match(/\b(a gauche|a droite|au milieu|au centre|au premier plan|a l'arriere-plan|au fond|devant|derriere|a cote de|pres de|au second plan)\b/g)||[]).length,lp=Math.min(2,loc);items.push(['Ortsangaben (à gauche, au premier plan …)',lp,2]);tot+=lp;
+  var ip=/\b(sur (l'|la |cette )?(image|photo|dessin|scene|illustration)|on voit|je vois|l'image montre|la photo montre|cette image)\b/.test(A)?1:0;items.push(['Einleitung (Sur l’image, on voit …)',ip,1]);tot+=ip;
+  var sp=/\b(peut-etre|probablement|sans doute|il semble|elle semble|ils semblent|on dirait|j'imagine|je pense|je suppose|doit etre|doivent etre|a l'air|ont l'air|surement)\b/.test(A)?1:0;items.push(['Vermutung (Il semble, elle a l’air …)',sp,1]);tot+=sp;
+  var bs=String(tx[1]||'').split(/[.!?\n]+/).map(noacc),bc=0;bs.forEach(function(s){if(/\b(avait|avaient|etait|etaient|avais|avions|avaient|s'etait|s'etaient)\s+(\w+\s+)?(\w+(e|i|u|is|it|ert|te|ts|ris|rt))\b/.test(s)&&s.trim().split(' ').length>=3)bc++});bc=Math.min(2,bc);items.push(['Zwei Sätze im plus-que-parfait (Teil B)',bc,2]);tot+=bc;
+  var cp=/\b(pour|sans|avant de|avant d')\s*\w+(er|ir|re|oir)\b|\bapres (avoir|etre|s'etre)\s+\w+/.test(C)?1:0;items.push(['Infinitivsatz (Teil C)',cp,1]);tot+=cp;
+  var wc=(tx[0]||'').trim().split(/\s+/).filter(Boolean).length;
+  return {pts:tot,max:17,fr:Math.min(1,tot/17/0.8),items:items,wc:wc,ok:tot/17>=0.7,found:per}}
+
+/* ---------- Das Buch (Universalbuch) ---------- */
+var BOOK=[
+{t:'Willkommen',h:'<h3>Le Fil Rouge – dein Fall</h3><p>Ein berühmtes Gemälde ist aus dem Louvre verschwunden. Der rote Faden führt durch acht Städte: Paris, Lyon, Marseille, Bordeaux, Strasbourg, Nice, Lille und Toulouse. Jede richtige Antwort bringt einen <b>Indice</b> (Hinweis). Fünf Hinweise entlarven den Dieb.</p><p>Am Ende wartet der <b>Boss</b>: Du beschreibst ein Bild („Bildbeschreibung“) und schreibst dazu Sätze im plus-que-parfait und mit Infinitivkonstruktion.</p><div class="rule"><b>Fragetypen:</b> Auswahl, Vrai/Faux, Lückentext zum Tippen, Übersetzen (Deutsch → Französisch), Zuordnen, Satzbau und der Boss mit freiem Text.</div><p class="ex">Tipp: Tippe möglichst mit Akzenten (é, è, à, ç …). Fehlende Akzente zählen nur als „fast richtig“.</p>'},
+{t:'Les temps du passé',h:'<h3>Die drei Vergangenheiten im Überblick</h3><table><tr><th>Zeit</th><th>Bildung</th><th>Funktion</th></tr><tr><td><b>passé composé</b></td><td>avoir/être (Präsens) + participe passé</td><td>einzelne, abgeschlossene Handlung („Vordergrund“)</td></tr><tr><td><b>imparfait</b></td><td>nous-Stamm + -ais, -ais, -ait, -ions, -iez, -aient</td><td>Beschreibung, Gewohnheit, Dauer („Hintergrund“)</td></tr><tr><td><b>plus-que-parfait</b></td><td>imparfait von avoir/être + participe passé</td><td>Vorzeitigkeit: was schon vorher geschehen war</td></tr></table><div class="rule">Hier, il <b>pleuvait</b> (Hintergrund) quand je <b>suis sorti</b> (Ereignis). Je ne savais pas qu’il <b>avait plu</b> toute la nuit (Vorzeitigkeit).</div>'},
+{t:'Passé composé',h:'<h3>Le passé composé</h3><p><b>Mit avoir</b> (die meisten Verben): j’ai mangé, tu as fini, nous avons pris. Das Partizip bleibt gleich – außer bei einem <b>vorangestellten direkten Objekt</b>: Les photos que j’ai <b>prises</b>.</p><p><b>Mit être:</b> aller, venir, arriver, partir, entrer, sortir, rentrer, rester, monter, descendre, tomber, naître, mourir, devenir, revenir, retourner, passer (par …) und <b>alle reflexiven Verben</b>. Das Partizip passt sich dem Subjekt an: Elle est allée. Ils se sont levés.</p><h3>Wichtige unregelmäßige Partizipien</h3><ul><li>avoir → <b>eu</b> · être → <b>été</b> · faire → <b>fait</b> · prendre → <b>pris</b></li><li>voir → <b>vu</b> · pouvoir → <b>pu</b> · vouloir → <b>voulu</b> · devoir → <b>dû</b></li><li>mettre → <b>mis</b> · dire → <b>dit</b> · écrire → <b>écrit</b> · lire → <b>lu</b></li><li>ouvrir → <b>ouvert</b> · offrir → <b>offert</b> · boire → <b>bu</b> · naître → <b>né</b> · mourir → <b>mort</b></li></ul><div class="rule">Verneinung: Je <b>n’</b>ai <b>pas</b> mangé. Reflexiv: Elle ne s’est pas levée.</div>'},
+{t:'Imparfait',h:'<h3>L’imparfait</h3><p>Nimm die <b>nous-Form</b> des Präsens, streiche -ons und hänge die Endungen an: nous parl<i>ons</i> → je parl<b>ais</b>, tu parl<b>ais</b>, il parl<b>ait</b>, nous parl<b>ions</b>, vous parl<b>iez</b>, ils parl<b>aient</b>.</p><ul><li><b>être</b> ist die einzige Ausnahme: j’étais, tu étais, il était, nous étions, vous étiez, ils étaient.</li><li>-cer: nous commen<b>ç</b>ons → je commen<b>ç</b>ais, aber nous commencions.</li><li>-ger: nous mangeons → je mang<b>e</b>ais, aber nous mangions.</li><li>faire → faisais · avoir → avais · finir → finissais · aller → allais · voir → voyais</li></ul><h3>Wann imparfait?</h3><ul><li>Beschreibung von Personen, Orten, Wetter: Il faisait beau.</li><li>Gewohnheiten: Chaque été, nous allions à la mer.</li><li>gleichzeitig laufende Handlungen und Zustände: Elle lisait pendant que je cuisinais.</li><li>Handlung im Verlauf, die unterbrochen wird: Je dormais quand il a téléphoné.</li></ul>'},
+{t:'Plus-que-parfait',h:'<h3>Le plus-que-parfait</h3><p><b>Bildung:</b> imparfait von avoir oder être + participe passé. Dasselbe Hilfsverb wie im passé composé.</p><ul><li>Il <b>avait</b> mangé. Nous <b>avions</b> fini.</li><li>Elle <b>était</b> partie. Ils <b>étaient</b> arrivés.</li><li>Elle <b>s’était</b> levée. (reflexiv: immer être)</li></ul><p><b>Funktion:</b> Die Handlung geschah <b>vor</b> einer anderen Handlung in der Vergangenheit.</p><div class="rule">Quand je suis arrivé, le film <b>avait</b> déjà <b>commencé</b>. – Il m’a dit qu’il <b>avait perdu</b> ses clés.</div><p>Signalwörter: <b>déjà, la veille, auparavant, avant, jamais (zuvor)</b>.</p>'},
+{t:'pc oder imparfait ?',h:'<h3>Passé composé oder imparfait?</h3><table><tr><th>passé composé</th><th>imparfait</th></tr><tr><td>soudain, tout à coup, un jour, hier, à ce moment-là</td><td>souvent, toujours, d’habitude, chaque jour, pendant que</td></tr><tr><td>Handlungsfolge: d’abord … puis … ensuite</td><td>Beschreibung, Hintergrund, Gefühle, Wetter</td></tr><tr><td>abgeschlossen, Ergebnis</td><td>Dauer, Wiederholung, Zustand</td></tr></table><div class="rule"><b>Fragetest:</b> „Was geschah dann?“ → passé composé. „Wie war die Situation?“ → imparfait. „Was war schon vorher?“ → plus-que-parfait.</div><p class="ex">Beispiel: Il <b>faisait</b> nuit. Soudain, un bruit <b>a retenti</b>. Marc <b>avait</b> déjà <b>fermé</b> la porte, mais il <b>a ouvert</b> la fenêtre.</p>'},
+{t:'Phrases à l’infinitif',h:'<h3>Elegant formulieren mit dem Infinitiv</h3><table><tr><th>Baustein</th><th>Bedeutung</th><th>Beispiel</th></tr><tr><td><b>pour + Inf.</b></td><td>um … zu</td><td>Il travaille pour réussir.</td></tr><tr><td><b>sans + Inf.</b></td><td>ohne … zu</td><td>Elle part sans dire un mot.</td></tr><tr><td><b>avant de + Inf.</b></td><td>bevor man …</td><td>Je lis avant de dormir.</td></tr><tr><td><b>après avoir / être + part. passé</b></td><td>nachdem man … hat</td><td>Après avoir mangé, il est sorti.</td></tr></table><div class="rule"><b>Regeln:</b> 1) Beide Satzteile haben dasselbe Subjekt. 2) Nach après: avoir oder être + Partizip, wie im passé composé; bei être passt sich das Partizip an (Après être arrivée, elle …). 3) Reflexiv: Après s’être levé(e) … 4) Verneinung: beide Teile vor dem Infinitiv: pour <b>ne pas</b> rater, sans <b>jamais</b> dire.</div>'},
+{t:'Portrait d’une personne',h:'<h3>Faire le portrait d’une personne</h3><p><b>Aussehen:</b> grand(e), petit(e), mince, fort(e), jeune, âgé(e) · les cheveux longs/courts/frisés/raides, blonds, bruns, noirs, roux, gris · les yeux bleus, verts, marron · la barbe, la moustache · les lunettes (f. pl.), les taches de rousseur, les rides.</p><p><b>Kleidung:</b> porter une veste, un pull, un manteau, un t-shirt, une robe, une jupe, un pantalon, une casquette, un bonnet, un chapeau, un béret, une écharpe.</p><p><b>Charakter:</b> sympathique, timide, généreux/généreuse, têtu(e), drôle, calme, nerveux/nerveuse, ouvert(e), travailleur/travailleuse.</p><p><b>Wirkung:</b> Il a l’air fatigué. Elle semble contente. Elle a l’air de s’ennuyer.</p><div class="rule">Farben: Adjektive wie <i>marron, orange</i> bleiben unverändert. Les yeux <b>bleus</b> (Plural), une veste <b>bleue</b> (feminin).</div><p class="ex">Beispiel: Léa est grande et mince. Elle a les cheveux longs et roux et elle porte souvent des lunettes rondes. Elle est drôle et très généreuse.</p>'},
+{t:'Décrire une image',h:'<h3>Bildbeschreibung in 4 Schritten</h3><ol><li><b>Einleitung:</b> Sur l’image/la photo, on voit … Il s’agit d’une scène à …</li><li><b>Ort und Aufbau:</b> au premier plan, à l’arrière-plan, au fond, à gauche, à droite, au milieu, devant, derrière, à côté de.</li><li><b>Personen:</b> Aussehen, Kleidung, Tätigkeit (Präsens!): Elle porte …, il lit …, ils discutent …</li><li><b>Deutung:</b> Il semble que … / Elle a l’air … / Ils doivent être … / Peut-être … / Je pense que …</li></ol><div class="rule"><b>Im Boss benötigst du:</b> Teil A (ca. 40–60 Wörter): Einleitung, Ort, zwei Personen genau, eine Vermutung. Teil B: zwei Sätze im plus-que-parfait über das, was vorher passiert war. Teil C: ein Satz mit pour / sans / avant de / après avoir|être + Infinitiv.</div><p class="ex">Beispiel: Sur l’image, on voit une place à Lyon. À gauche, un jeune homme à la barbe joue de la guitare. Il porte une veste grise. Au milieu, une femme blonde tient un parapluie. Elle semble attendre quelqu’un. – Avant de venir, le jeune homme avait emporté sa guitare. – La femme regarde le ciel pour savoir s’il va pleuvoir.</p>'},
+{t:'Connecteurs',h:'<h3>Redemittel für Texte</h3><ul><li><b>Reihenfolge:</b> d’abord, puis, ensuite, après, enfin, finalement, plus tard</li><li><b>Zeit:</b> soudain, tout à coup, pendant que, quand, lorsque, à ce moment-là, la veille, le lendemain</li><li><b>Grund/Folge:</b> parce que, car, comme, donc, alors, c’est pourquoi</li><li><b>Gegensatz:</b> mais, pourtant, cependant, par contre, malgré</li><li><b>Meinung:</b> à mon avis, je pense que, il me semble que, selon moi</li></ul><div class="rule">„denn“ = <b>car</b> (nie am Satzanfang) · „weil“ = <b>parce que</b> · „gleichzeitig“ = <b>en même temps</b>.</div>'},
+{t:'Banlieue-Wortschatz',h:'<h3>Vokabeln aus deinen Karten</h3><p class="ex">Deine Anki-Datei enthielt nur die deutsche Seite. Die französischen Entsprechungen wurden ergänzt – bitte mit deinem Schulbuch abgleichen.</p><div class="vocgrid" id="vocg"></div>'},
+{t:'Fehlerfallen',h:'<h3>Typische Fehler</h3><ul><li><b>Falsches Hilfsverb:</b> ✗ J’ai allé → ✓ Je suis allé(e).</li><li><b>Keine Angleichung bei être:</b> ✗ Elle est parti → ✓ Elle est partie.</li><li><b>Reflexiv mit avoir:</b> ✗ Elle a levée → ✓ Elle s’est levée.</li><li><b>imparfait statt passé composé</b> für Einzelereignisse: ✗ Soudain, il entendait un bruit → ✓ Soudain, il a entendu un bruit.</li><li><b>Plusquamperfekt vergessen:</b> ✗ Quand je suis arrivé, il est parti → ✓ … il était déjà parti.</li><li><b>Infinitiv:</b> ✗ sans disant → ✓ sans dire. ✗ après arriver → ✓ après être arrivé(e).</li><li><b>Adjektiv:</b> ✗ les cheveux long → ✓ les cheveux longs.</li><li><b>Brille:</b> ✗ une lunette → ✓ des lunettes.</li></ul>'}];
+var TIPS=['Le saviez-vous ? Die Baguette gehört seit 2022 zum immateriellen Kulturerbe der UNESCO.','Merke: Bei „aller“, „venir“, „partir“ & Co. nimmst du être. Das Partizip richtet sich nach dem Subjekt.','Le saviez-vous ? Der Eiffelturm wurde für die Weltausstellung 1889 gebaut und sollte nur 20 Jahre stehen bleiben.','Merke: Soudain = passé composé. D’habitude = imparfait. Auparavant = plus-que-parfait.','Eselsbrücke: Nach „sans“ und „avant de“ steht der Infinitiv – ganz ohne Hilfsverb.','Le saviez-vous ? In Marseille isst man gern Bouillabaisse, einen Fischeintopf mit Safran.','Merke: „Après“ braucht immer avoir/être + Partizip: Après avoir mangé, … Après être sortie, …','Le saviez-vous ? Das Straßburger Münster war jahrhundertelang das höchste Gebäude der Welt.','Beim Beschreiben: Zuerst Ort, dann Personen, am Ende eine Vermutung (il semble que …).','Merke: les yeux bleus, les cheveux longs: Adjektive nach „les“ stehen im Plural.','Le saviez-vous ? Die Promenade des Anglais in Nice ist knapp 7 km lang.','Tipp: Tippe Akzente mit. Ohne Akzent gibt es nur halbe Punkte.','Le saviez-vous ? Toulouse heißt „la ville rose“ – wegen der rosa Backsteine.','Merke: Reflexive Verben bilden das passé composé immer mit être.'];
+
+/* ---------- Profil, Abzeichen, Zustand ---------- */
+var BYID={};BANK.forEach(function(q){BYID[q.id]=q});
+var BADGES=[{id:'first',n:'Premier pas',d:'Beende deine erste Runde.',i:'flame'},{id:'marathon',n:'Marathon',d:'Beende 5 Runden.',i:'map'},
+{id:'perfect',n:'Sans faute',d:'Alle Fragen und den Boss in einer Runde richtig.',i:'star'},{id:'chef',n:'Chef détective',d:'Sammle 5 Hinweise in einer Runde.',i:'search'},
+{id:'indice',n:'Premier indice',d:'Finde deinen ersten Hinweis.',i:'key'},{id:'s5',n:'Série 5',d:'5 richtige Antworten in Folge.',i:'award'},
+{id:'s8',n:'Série 8',d:'8 richtige Antworten in Folge.',i:'trophy'},{id:'passe',n:'Maître du passé',d:'5 Treffer bei Fragen zu den Vergangenheitszeiten in einer Runde.',i:'moon'},
+{id:'infin',n:'Roi de l’infinitif',d:'Alle Infinitiv-Fragen einer Runde richtig (mind. 3).',i:'crown'},{id:'portrait',n:'Portraitiste',d:'3 richtige Antworten zur Personenbeschreibung in einer Runde.',i:'user'},
+{id:'voc',n:'Vocabulaire d’or',d:'4 Vokabelfragen in einer Runde richtig.',i:'scroll'},{id:'team',n:'Équipe de choc',d:'Gewinne eine Runde im Teammodus.',i:'users'},
+{id:'duel',n:'Duelliste',d:'Gewinne ein Duell gegen mindestens eine Person.',i:'swords'},{id:'reader',n:'Bibliophile',d:'Öffne das Buch.',i:'book'},
+{id:'poly',n:'Polyglotte',d:'5 getippte Antworten in einer Runde richtig.',i:'globe'},{id:'filet',n:'Sans filet',d:'Alle getippten Aufgaben einer Runde richtig (mind. 3).',i:'pen'},
+{id:'curieux',n:'Curieux',d:'Spiele mit drei verschiedenen Rollen.',i:'bulb'},{id:'plume',n:'Plume d’or',d:'Löse den Boss mit mindestens 40 Wörtern in Teil A.',i:'pen'},
+{id:'tour',n:'Tour de France',d:'Besuche alle 8 Städte in einer Runde (Länge „Lang“).',i:'tower'},{id:'legende',n:'Légende',d:'Erreiche 3000 Erfahrung.',i:'shield'}];
+var P={name:LS.get('name',''),av:LS.get('av',0),role:LS.get('role',0),xp:LS.get('xp',0),runs:LS.get('runs',0),badges:LS.get('badges',{}),used:LS.get('used',[]),usedBoss:LS.get('usedBoss',[]),roles:LS.get('roles',[])};
+function saveP(){['name','av','role','xp','runs','badges','used','usedBoss','roles'].forEach(function(k){LS.set(k,P[k])})}
+function rankOf(xp){var i=0;RANKS.forEach(function(r,k){if(xp>=r[0])i=k});var nx=RANKS[i+1];return {name:RANKS[i][1],pct:nx?Math.round((xp-RANKS[i][0])/(nx[0]-RANKS[i][0])*100):100,next:nx?nx[0]:null}}
+function myRole(){return ROLES[P.role]||ROLES[0]}
+var base=null;
+var G={room:null,code:null,solo:false,S:null,maxRev:0,dl:0,qStart:0,spec:false,cur:{},run:null,my:null,myA:{},answered:false,joinedAt:0,unsub:[],conn:true,dead:false,tk:0,hb:0,book:0,gain:null,awardedSeed:null,tip:0,screen:'intro'};
+function resetMy(){G.my={sc:0,st:0,best:0,okc:0,bossOk:false,bossFr:0,hints:0,tpc:{},ty:0,tyOk:0,gd:false,wc:0};G.myA={};G.answered=false;G.cur={}}
+resetMy();
+var toastT=0;
+function toast(m,ms){var t=$('#toast');t.innerHTML='<div class="toast" role="status">'+esc(m)+'</div>';clearTimeout(toastT);toastT=setTimeout(function(){t.innerHTML=''},ms||3200)}
+/* ---------- Räume ---------- */
+function LocalRoom(){var me={peer:'local',isMe:true,sameTab:true,kind:'viewer',guest:false,by:null,presence:{},updatedAt:Date.now()},hs={},ph=[];
+ return {emit:function(t,d){setTimeout(function(){(hs[t]||[]).slice().forEach(function(h){h({topic:t,data:d,peer:'local',isMe:true,sameTab:true,kind:'viewer',guest:false,by:null})})},0);return Promise.resolve()},
+ on:function(t,h){(hs[t]=hs[t]||[]).push(h);return function(){hs[t]=(hs[t]||[]).filter(function(x){return x!==h})}},
+ presence:function(p){var np=Object.assign({},me.presence);for(var k in p){if(p[k]===null)delete np[k];else np[k]=p[k]}me=Object.assign({},me,{presence:np,updatedAt:Date.now()});ph.slice().forEach(function(h){h({peers:[me],joined:[],left:[],updated:[me]})});return Promise.resolve()},
+ peers:function(){return [me]},onPeers:function(h){ph.push(h);setTimeout(function(){h({peers:[me],joined:[me],left:[],updated:[]})},0);return function(){ph=ph.filter(function(x){return x!==h})}},
+ connected:function(){return true},onConnection:function(h){setTimeout(function(){h(true)},0);return function(){}},leave:function(){return Promise.resolve()}}}
+function pres(p){if(G.room){try{G.room.presence(p).catch(function(){})}catch(e){}}}
+function plist(){return G.room?G.room.peers().filter(function(p){return p.kind!=='agent'&&p.presence&&p.presence.name}):[]}
+function hostPeer(){var a=plist(),best=null;a.forEach(function(p){var t=+p.presence.t||0;if(!best||t<best.t||(t===best.t&&p.peer<best.p.peer))best={t:t,p:p}});return best&&best.p}
+function iAmHost(){var h=hostPeer();return !!(h&&h.sameTab)}
+function players(){return plist().filter(function(p){return !p.presence.sp})}
+async function joinRoom(code,solo){
+  var room=null;
+  if(!solo&&base){try{room=await base.join('fil-'+code.toLowerCase())}catch(e){room=null;toast('Die Lobby konnte nicht geöffnet werden. Du spielst solo.',5000)}}
+  else if(!solo){toast('Mehrspieler ist hier nicht verfügbar. Du spielst solo.',5000)}
+  if(!room){room=LocalRoom();solo=true;code='SOLO'}
+  teardown();resetMy();
+  G.room=room;G.code=code;G.solo=solo;G.S=null;G.maxRev=0;G.run=null;G.spec=false;G.dead=false;G.conn=true;G.joinedAt=Date.now();G.gain=null;
+  var onErr=function(){G.dead=true;toast('Die Verbindung zur Lobby wurde beendet.',5000);render()};
+  G.unsub=[room.on('state',onStateMsg,onErr),room.onPeers(onPeers,onErr),room.onConnection(function(c){G.conn=c;schedRender()},onErr)];
+  pres({name:P.name,av:P.av,role:P.role,t:Date.now(),sc:0,st:0,q:-1});
+  if(P.roles.indexOf(P.role)<0){P.roles.push(P.role);if(P.roles.length>=3)giveBadge('curieux');saveP()}
+  G.tk=setInterval(tick,400);G.hb=setInterval(heartbeat,4000);
+  go('lobby');
+}
+function giveBadge(id){if(!P.badges[id]){P.badges[id]=1;saveP();return true}return false}
+function teardown(){clearInterval(G.tk);clearInterval(G.hb);(G.unsub||[]).forEach(function(u){try{u()}catch(e){}});G.unsub=[];if(G.room){try{G.room.leave()}catch(e){}}G.room=null}
+function leaveRoom(){teardown();G.S=null;G.run=null;G.spec=false;go('menu')}
+/* ---------- Zustand senden und empfangen ---------- */
+function emitErr(e){if(e&&e.code==='not_permitted')toast('Dir fehlen die Rechte zum Mitspielen. Die Seite muss dir als Mitwirkender (Contributor) freigegeben sein.',7000)}
+function hostEmit(patch){if(!G.room)return;var s=Object.assign({},G.S||{ph:'lobby',mode:'vs',tp:ALLTP.slice(),n:7,i:0,fl:3,lt:0},patch);s.rev=G.maxRev+1;try{G.room.emit('state',s).catch(emitErr)}catch(e){}}
+function heartbeat(){if(G.room&&G.S&&iAmHost()){try{G.room.emit('state',Object.assign({},G.S,{left:Math.max(0,(G.dl-Date.now())/1000)})).catch(function(){})}catch(e){}}}
+function cleanState(s){
+  if(!s||typeof s!=='object')return null;if(['lobby','load','q','rv','end'].indexOf(s.ph)<0)return null;
+  var c=function(v,a,b,d){v=+v;if(isNaN(v))v=d;return Math.max(a,Math.min(b,v))};
+  var o={ph:s.ph,rev:c(s.rev,0,1e9,0),mode:s.mode==='coop'?'coop':'vs',n:c(s.n,1,12,7),i:c(s.i,0,20,0),left:c(s.left,0,400,0),fl:c(s.fl,0,9,3),lt:c(s.lt,0,30,0),good:s.good?1:0,win:s.win?1:0,seed:c(s.seed,0,2e9,0),boss:c(s.boss,0,SCENES.length-1,0)};
+  o.tp=(Array.isArray(s.tp)?s.tp:[]).filter(function(t){return TOP[t]}).slice(0,8);if(!o.tp.length)o.tp=ALLTP.slice();
+  o.ids=(Array.isArray(s.ids)?s.ids:[]).filter(function(id){return typeof id==='string'&&BYID[id]}).slice(0,12);
+  if(o.ph!=='lobby'&&o.ids.length)o.n=o.ids.length;
+  return o}
+function onStateMsg(m){var s=cleanState(m&&m.data);if(s)applyState(s)}
+function applyState(s){
+  if(G.S&&s.rev<=G.S.rev)return;
+  var prev=G.S;G.S=s;G.maxRev=s.rev;G.dl=Date.now()+s.left*1000;
+  var changed=!prev||prev.ph!==s.ph||prev.i!==s.i;
+  if(!prev&&s.ph!=='lobby'){G.spec=true;pres({sp:1})}
+  if(s.ph==='lobby'){G.spec=false;resetMy();G.run=null;pres({sp:null,sc:0,st:0,q:-1,d:null,a:null,ok:null,fr:null,pts:0,pk:null})}
+  if(s.ph==='load'&&(prev&&prev.ph==='lobby'||!G.run)){if(!G.spec)resetMy();pres({sc:0,st:0,q:-1,d:null,a:null,ok:null,fr:null,pts:0,pk:null});G.tip=Math.floor(Math.random()*TIPS.length)}
+  if(s.ids.length&&(!G.run||G.run.seed!==s.seed))buildRun(s);
+  if(s.ph==='q'&&changed){var v=curView();G.cur=newCur(v);G.answered=false;G.qStart=Date.now();pres({pk:null})}
+  if(s.ph==='end')awardEnd();
+  render(changed)}
+function onPeers(ch){if(ch.joined.some(function(p){return !p.isMe})&&G.S&&iAmHost())heartbeat();schedRender()}
+/* ---------- Fragen und Wertung ---------- */
+function viewOf(q,seed){
+  var r=rng(hash(seed+':'+q.id)),b={id:q.id,tp:q.tp,ty:q.ty,tx:q.q,ex:q.ex};
+  if(q.ty==='mc'){var o=shuffle([q.c].concat(q.w),r);b.opts=o;b.cor=o.indexOf(q.c);b.dur=25}
+  else if(q.ty==='tf'){b.opts=['Vrai','Faux'];b.cor=q.a?0:1;b.dur=18}
+  else if(q.ty==='gp'){b.parts=q.t.split('{}');b.ans=q.a;b.dur=Math.min(80,28+22*q.a.length)}
+  else if(q.ty==='tr'){b.vars=q.a;b.dur=60}
+  else if(q.ty==='ma'){var R=shuffle(q.p.map(function(x){return x[1]}),r);b.L=q.p.map(function(x){return x[0]});b.R=R;b.map=q.p.map(function(x){return R.indexOf(x[1])});b.dur=50}
+  else{var ix=shuffle(q.items.map(function(_,i){return i}),r);b.items=ix.map(function(i){return q.items[i]});b.sorted=q.items;b.alts=q.alts||[];b.dur=60}
+  return b}
+function bossView(si){return {id:'boss',tp:'bs',ty:'bs',si:si,dur:240}}
+function buildRun(s){G.run={seed:s.seed,qs:s.ids.map(function(id){return viewOf(BYID[id],s.seed)}),boss:bossView(s.boss)}}
+function curView(){var S=G.S;if(!S||!G.run)return null;return S.i<G.run.qs.length?G.run.qs[S.i]:G.run.boss}
+function newCur(v){if(!v)return {};if(v.ty==='ma'){var m=[];v.L.forEach(function(){m.push(-1)});return {map:m,al:-1}}if(v.ty==='or')return {seq:[]};
+  if(v.ty==='gp'){return {tx:v.ans.map(function(){return ''})}}if(v.ty==='tr')return {tx:['']};if(v.ty==='bs')return {tx:['','','']};return {pk:-1,hid:[]}}
+function cityOf(i){var S=G.S;return CITIES[(i+S.seed)%CITIES.length]}
+function thief(){return THIEVES[G.S.seed%THIEVES.length]}
+function isTyped(v){return v.ty==='gp'||v.ty==='tr'||v.ty==='bs'}
+function grade(v,a){var c=0;
+  if(v.ty==='mc'||v.ty==='tf'){var ok=a===v.cor;return {ok:ok,fr:ok?1:0}}
+  if(v.ty==='ma'){v.map.forEach(function(m,i){if(a&&a[i]===m)c++});return {ok:c===v.map.length,fr:c/v.map.length}}
+  if(v.ty==='or'){var w=(a||[]).map(function(d){return v.items[d]||''}),j=norm(w.join(' ')),goods=[v.sorted].concat(v.alts).map(function(x){return norm(x.join(' '))});
+    if(goods.indexOf(j)>=0)return {ok:true,fr:1};w.forEach(function(x,k){if(norm(x)===norm(v.sorted[k]||''))c++});return {ok:false,fr:c/v.sorted.length*.5}}
+  if(v.ty==='gp'){var t=0;v.ans.forEach(function(vs,i){t+=typedFr((a&&a[i])||'',vs)});var f=t/v.ans.length;return {ok:f>=.999,fr:f}}
+  if(v.ty==='tr'){var f2=typedFr(typeof a==='string'?a:'',v.vars);return {ok:f2>=.999,fr:f2}}
+  var g=gradeBoss(v.si,(a&&a.t)||[]);return {ok:g.ok,fr:g.fr,bw:g.wc}}
+function submit(ans){
+  var S=G.S;if(!S||S.ph!=='q'||G.spec||G.answered)return;var v=curView();if(!v)return;
+  var left=(G.dl-Date.now())/1000,g=grade(v,ans),pts,m=G.my,role=myRole().id;
+  if(v.ty==='bs')pts=Math.round(g.fr*600);
+  else{pts=Math.round(100*g.fr);if(g.ok){var sp=Math.round(100*Math.max(0,Math.min(1,left/v.dur))),stb=Math.min(m.st,5)*20;if(role==='jou')sp*=2;if(role==='car')stb*=2;pts+=sp+stb;if(role==='lin'&&isTyped(v))pts+=20}}
+  if(G.cur.hp)pts=Math.max(0,pts-25);
+  G.answered=true;G.myA[S.i]={a:ans,ok:g.ok,fr:g.fr,pts:pts};m.sc+=pts;
+  if(v.ty==='bs'){m.bossOk=g.ok;m.bossFr=g.fr;m.wc=g.bw||0}
+  else{var t=m.tpc[v.tp]||[0,0];t[1]++;if(g.ok)t[0]++;m.tpc[v.tp]=t;if(isTyped(v)){m.ty++;if(g.ok)m.tyOk++}}
+  if(g.ok){m.st++;if(v.ty!=='bs')m.okc++}else if(role==='gar'&&!m.gd){m.gd=true}else m.st=0;m.best=Math.max(m.best,m.st);
+  var pa=ans;if(v.ty==='bs')pa={t:(ans.t||[]).map(function(x){return String(x).slice(0,380)})};else if(v.ty==='gp')pa=(ans||[]).map(function(x){return String(x).slice(0,60)});else if(v.ty==='tr')pa=String(ans||'').slice(0,200);
+  pres({q:S.i,d:1,a:pa,ok:g.ok?1:0,fr:g.fr,pts:pts,sc:m.sc,st:m.st,pk:null});render()}
+function autoSubmit(){var v=curView();if(!v)return;var c=G.cur,a;
+  if(v.ty==='mc'||v.ty==='tf')a=c.pk!=null?c.pk:-1;else if(v.ty==='ma')a=c.map;else if(v.ty==='or')a=c.seq;else if(v.ty==='gp')a=c.tx;else if(v.ty==='tr')a=c.tx[0];else a={t:c.tx};submit(a)}
+function canConfirm(v){var c=G.cur;if(v.ty==='mc'||v.ty==='tf')return c.pk>=0;if(v.ty==='ma')return c.map.every(function(x){return x>=0});if(v.ty==='or')return c.seq.length===v.items.length;
+  if(v.ty==='gp')return c.tx.some(function(x){return x.trim()});if(v.ty==='tr')return !!c.tx[0].trim();return !!c.tx[0].trim()}
+/* ---------- Host-Ablauf ---------- */
+function allAnswered(){var ps=players();return ps.length>0&&ps.every(function(p){return p.presence.q===G.S.i&&p.presence.d===1})}
+function hostReveal(){var S=G.S,ps=players(),sum=0;ps.forEach(function(p){if(p.presence.q===S.i)sum+=(+p.presence.fr||0)});
+  var avg=ps.length?sum/ps.length:0,boss=S.i>=S.n,good=avg>=(boss?0.6:0.5),fl=S.fl,lt=S.lt;if(good)lt++;else fl--;
+  hostEmit({ph:'rv',left:boss?60:12,fl:Math.max(0,fl),lt:lt,good:good?1:0})}
+function hostNext(){var S=G.S;
+  if(S.mode==='coop'&&S.fl<=0)hostEmit({ph:'end',left:0,win:0});
+  else if(S.i<S.n)hostEmit({ph:'q',i:S.i+1,left:G.run.qs[S.i+1]?G.run.qs[S.i+1].dur:G.run.boss.dur});
+  else hostEmit({ph:'end',left:0,win:S.mode==='coop'&&S.fl>0?1:0})}
+function pickRun(tps,n){var used=P.used,pools={},out=[],g=0;
+  tps.forEach(function(t){pools[t]=shuffle(BANK.filter(function(q){return q.tp===t}))});
+  var order=shuffle(tps);
+  while(out.length<n&&g<400){var t=order[g%order.length];g++;var pl=pools[t];
+    var q=pl.find(function(x){return used.indexOf(x.id)<0&&out.indexOf(x.id)<0})||pl.find(function(x){return out.indexOf(x.id)<0});if(q)out.push(q.id)}
+  P.used=used.concat(out).slice(-120);var bs=[];SCENES.forEach(function(_,i){if(P.usedBoss.indexOf(i)<0)bs.push(i)});if(!bs.length){P.usedBoss=[];bs=SCENES.map(function(_,i){return i})}
+  var boss=bs[Math.floor(Math.random()*bs.length)];P.usedBoss=P.usedBoss.concat([boss]).slice(-3);saveP();return {ids:shuffle(out),boss:boss}}
+function startRun(){var S=G.S;if(!S)return;var r=pickRun(S.tp,S.n);hostEmit({ph:'load',seed:Math.floor(Math.random()*1e9)+1,ids:r.ids,boss:r.boss,i:0,fl:3,lt:0,good:0,win:0,left:8})}
+function tick(){
+  if(!G.room)return;var S=G.S,now=Date.now();
+  if(!S){if(iAmHost()&&(G.solo||now-G.joinedAt>3000))hostEmit({ph:'lobby'});return}
+  tickUI();
+  if(S.ph==='q'&&!G.spec&&!G.answered&&now>=G.dl)autoSubmit();
+  if(!iAmHost())return;
+  if(S.ph==='load'&&now>=G.dl&&G.run)hostEmit({ph:'q',i:0,left:G.run.qs[0].dur});
+  else if(S.ph==='q'){if((allAnswered()&&now>G.qStart+1200)||now>G.dl+2500)hostReveal()}
+  else if(S.ph==='rv'&&now>=G.dl)hostNext()}
+/* ---------- Belohnungen ---------- */
+function tpOk(t){var x=G.my.tpc[t];return x?x[0]:0}
+function awardEnd(){var S=G.S;if(G.spec||G.awardedSeed===S.seed||!G.run)return;G.awardedSeed=S.seed;
+  var m=G.my,ps=players(),win=false,gain=30+m.okc*10+(m.bossOk?50:0);
+  if(S.mode==='coop')win=S.fl>0;else{var top=0;ps.forEach(function(p){top=Math.max(top,+p.presence.sc||0)});win=ps.length>1&&m.sc>=top&&m.sc>0}
+  if(win)gain+=20;
+  P.xp+=gain;P.runs++;var nb=[],cl=Math.min(5,S.mode==='coop'?S.lt:m.okc);
+  var give=function(id){if(giveBadge(id))nb.push(id)};
+  give('first');if(P.runs>=5)give('marathon');if(m.okc===S.n&&m.bossOk)give('perfect');if(cl>=5)give('chef');if(cl>=1)give('indice');if(m.best>=5)give('s5');if(m.best>=8)give('s8');
+  if(tpOk('pc')+tpOk('im')+tpOk('pq')+tpOk('tp')>=5)give('passe');var inf=m.tpc.inf;if(inf&&inf[1]>=3&&inf[0]===inf[1])give('infin');
+  if(tpOk('pd')>=3)give('portrait');if(tpOk('vo')>=4)give('voc');if(S.mode==='coop'&&win)give('team');if(S.mode==='vs'&&win&&ps.length>1)give('duel');
+  if(m.tyOk>=5)give('poly');if(m.ty>=3&&m.tyOk===m.ty)give('filet');if(m.bossOk&&m.wc>=40)give('plume');if(S.n>=8)give('tour');if(P.xp>=3000)give('legende');
+  saveP();G.gain={xp:gain,nb:nb,win:win,cl:cl}}
+
+/* ---------- Darstellung ---------- */
+G.screen=P.name?'menu':'intro';var netState=0;
+function go(s){G.screen=s;render(true)}
+var rq=0;function schedRender(){if(rq)return;rq=requestAnimationFrame(function(){rq=0;render()})}
+function nm(p){return esc(String(p&&p.name||'Inconnu(e)').slice(0,18))}
+function avH(pr,sz){var s=SIGILS[(+(pr&&pr.av))||0]||SIGILS[0];return '<span class="av" style="--sz:'+sz+'px;--c:'+s.c+'">'+icon(s.g)+'</span>'}
+function netChip(){return netState===1?'<span class="chip ok" id="netchip">Mehrspieler bereit</span>':netState===2?'<span class="chip warn" id="netchip">Nur Solo möglich</span>':'<span class="chip" id="netchip">Verbinde …</span>'}
+function updateNet(){var c=$('#netchip');if(c)c.outerHTML=netChip()}
+function render(fresh){
+  var ae=document.activeElement,key=null;
+  if(ae&&ae.dataset&&ae.dataset.i!=null&&ae.matches&&ae.matches('input.blank,textarea.free'))key={i:ae.dataset.i,s:ae.selectionStart,e:ae.selectionEnd};
+  var h,cl='';
+  if(G.screen==='intro'){h=vIntro();cl=' center'}else if(G.screen==='menu')h=vMenu();else h=vRoom();
+  $('#app').innerHTML='<div class="screen'+cl+(fresh?' fresh':'')+'">'+h+'</div>';
+  if(key&&!fresh){var el=$('[data-i="'+key.i+'"]');if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA')){el.focus();try{el.setSelectionRange(key.s,key.e)}catch(e){}}}
+  if(G.screen==='room'||G.screen==='lobby')tickUI()}
+function logo(sz){return '<h1 class="logo"'+(sz?' style="font-size:'+sz+'"':'')+'>Le Fil Rouge</h1><div class="sub" style="margin-top:6px">Enquête à travers la France</div>'}
+function vIntro(){return '<div>'+logo()+'</div><div class="panel intro-card"><p class="muted">Un tableau a disparu du Louvre. Ton enquête commence à Paris. Comment t’appelles-tu, détective ?</p>'+
+  '<input id="nm" type="text" maxlength="18" autocomplete="off" placeholder="Ton nom" value="'+esc(P.name)+'" aria-label="Dein Name"><div class="lbl">Wähle dein Siegel</div><div class="sigs">'+
+  SIGILS.map(function(s,i){return '<button class="sig'+(P.av===i?' on':'')+'" data-act="sig" data-i="'+i+'">'+avH({av:i},44)+s.n+'</button>'}).join('')+'</div>'+
+  '<div class="lbl">Wähle deine Rolle</div><div class="col" id="roles">'+rolesH()+'</div><button class="btn gold big" data-act="enter">Commencer l’enquête</button></div>'}
+function rolesH(){return ROLES.map(function(r,i){return '<button class="opt'+(P.role===i?' sel':'')+'" data-act="role" data-i="'+i+'"><span class="k">'+icon(r.i,18)+'</span><span><b>'+r.n+'</b><br><small class="muted">'+r.d+'</small></span></button>'}).join('')}
+function vMenu(){var r=rankOf(P.xp),n=0;BADGES.forEach(function(b){if(P.badges[b.id])n++});
+  return '<div class="row"><div>'+logo('clamp(26px,5vw,44px)')+'</div><span class="sp"></span>'+netChip()+'</div>'+
+  '<div class="menu-grid"><div class="panel col"><div class="hero">'+avH({av:P.av},72)+'<div style="flex:1;min-width:0"><div class="nm">'+esc(P.name)+'</div><div class="muted">'+esc(r.name)+' · '+myRole().n+'</div><div class="xp"><i style="width:'+r.pct+'%"></i></div><div class="lbl" style="margin-top:6px">'+P.xp+' Erfahrung'+(r.next?' · nächster Rang bei '+r.next:'')+'</div></div></div>'+
+  '<div class="row"><button class="btn sm" data-act="badges">'+icon('award',16)+'Abzeichen ('+n+'/'+BADGES.length+')</button><button class="btn sm" data-act="roles">'+icon(myRole().i,16)+'Rolle wechseln</button><button class="btn sm ghost" data-act="rename">Name ändern</button></div>'+
+  '<p class="muted">Folge dem roten Faden durch acht Städte: Vergangenheitszeiten, Infinitivsätze, Personenbeschreibung und Vokabeln. Am Ende wartet der Boss: eine Bildbeschreibung.</p></div>'+
+  '<div class="panel col"><button class="btn gold big" data-act="create">'+icon('door',20)+'Lobby erstellen</button><div class="row"><input id="code" class="codein" type="text" maxlength="6" placeholder="CODE" autocomplete="off" aria-label="Lobby-Code"><button class="btn" data-act="join">Beitreten</button></div>'+
+  '<button class="btn" data-act="solo">'+icon('user',18)+'Solo-Training</button><button class="btn" data-act="book">'+icon('book',18)+'Buch lesen</button></div></div>'}
+function plH(rv){var ps=plist(),h=hostPeer(),S=G.S;
+  ps.sort(function(a,b){return rv?(+b.presence.sc||0)-(+a.presence.sc||0):(+a.presence.t||0)-(+b.presence.t||0)});
+  return '<div class="players">'+ps.map(function(p){var pr=p.presence,done=S&&S.ph==='q'&&pr.q===S.i&&pr.d===1&&!pr.sp,ro=ROLES.filter(function(r){return r.id===(ROLES[pr.role]||{}).id})[0];
+    return '<div class="pl'+(p.sameTab?' me':'')+(done?' done':'')+'">'+avH(pr,34)+'<span class="nm">'+nm(pr)+'</span>'+(h&&p.peer===h.peer?'<span title="Gastgeber" style="color:var(--gold)">'+icon('crown',17)+'</span>':'')+(pr.sp?'<span class="chip">Zuschauer</span>':ro&&!rv?'<span class="chip">'+ro.n+'</span>':'')+
+    (rv&&S.ph==='rv'&&pr.q===S.i?'<span class="chip '+(pr.ok?'ok':'')+'">+'+(+pr.pts||0)+'</span>':'')+(rv?'<span class="sc">'+(+pr.sc||0)+'</span>':'')+'</div>'}).join('')+'</div>'}
+function vRoom(){var S=G.S;
+  if(!S)return '<div class="panel col center" style="align-items:center;text-align:center;margin:auto"><div class="ring"><i></i><i></i><i></i><b>'+icon('map',38)+'</b></div><div class="h2">Verbinde mit der Lobby '+esc(G.code)+' …</div><p class="muted">Das dauert einige Sekunden. Findet sich niemand, prüfe den Code und ob alle Zugriff auf diese Seite haben.</p><button class="btn" data-act="leave">Abbrechen</button></div>';
+  if(S.ph==='lobby')return vLobby();if(S.ph==='load')return vLoad();if(S.ph==='end')return vEnd();return vQuestion(S.ph==='rv')}
+function warnH(){var w='';if(G.dead||!G.conn)w+='<div class="banner bad">Die Verbindung ist unterbrochen. Warte kurz oder verlasse die Lobby.</div>';
+  if(G.spec)w+='<div class="banner neutral">Die Runde läuft schon. Du schaust zu und steigst in der nächsten Runde ein.</div>';return w}
+function vLobby(){var S=G.S,host=iAmHost(),d=host?'':' disabled',ps=plist().length;
+  var modes='<div class="modes"><button class="mode'+(S.mode==='vs'?' on':'')+'" data-act="mode" data-m="vs"'+d+'><b>'+icon('swords',20)+'Wettkampf</b><span>Duell: Wer richtig und schnell antwortet, gewinnt.</span></button><button class="mode'+(S.mode==='coop'?' on':'')+'" data-act="mode" data-m="coop"'+d+'><b>'+icon('shield',20)+'Gemeinsam</b><span>Ermittlung im Team: Ihr sammelt gemeinsam Hinweise.</span></button></div>';
+  var tps='<div class="tps">'+TOPICS.map(function(t){return '<button class="tp'+(S.tp.indexOf(t.id)>=0?' on':'')+'" style="--c:'+t.c+'" data-act="tp" data-t="'+t.id+'"'+d+'><i></i>'+t.n+'</button>'}).join('')+'</div>';
+  var len='<div class="seg"'+d+'>'+[[5,'Kurz'],[7,'Normal'],[9,'Lang']].map(function(x){return '<button class="'+(S.n===x[0]?'on':'')+'" data-act="len" data-v="'+x[0]+'"'+d+'>'+x[1]+' ('+x[0]+')</button>'}).join('')+'</div>';
+  return warnH()+'<div class="menu-grid"><div class="panel col"><div class="lbl">'+(G.solo?'Solo-Training':'Lobby-Code')+'</div>'+
+   (G.solo?'':'<div class="row"><span class="code-box">'+esc(G.code)+'</span><button class="btn sm" data-act="copy">'+icon('copy',16)+'Kopieren</button></div><p class="muted">Gib den Code weiter. Mitspielende brauchen Zugriff auf diese Seite.'+(ps<2?' Noch bist du allein.':'')+'</p>')+
+   '<div class="lbl">Spielende ('+ps+')</div>'+plH(false)+'<div class="chip">Deine Rolle: '+myRole().n+'</div></div>'+
+   '<div class="panel col"><div class="lbl">Modus</div>'+modes+'<div class="lbl">Themen</div>'+tps+'<div class="lbl">Länge (plus Boss: Bildbeschreibung)</div>'+len+
+   '<div class="row" style="margin-top:4px"><button class="btn" data-act="book">'+icon('book',18)+'Buch lesen</button><span class="sp"></span><button class="btn ghost" data-act="leave">Verlassen</button>'+
+   (host?'<button class="btn gold big" data-act="start">'+icon('star',18)+(!G.solo&&ps<2?'Allein starten':'Runde starten')+'</button>':'<span class="chip">Der Gastgeber startet die Runde</span>')+'</div></div></div>'}
+function vLoad(){var S=G.S;if(!G.tipAt||Date.now()-G.tipAt>20000)G.tipAt=Date.now();
+  return '<div class="center" style="display:flex;flex-direction:column;align-items:center;gap:22px;margin:auto;text-align:center"><div class="sub">'+(S.mode==='coop'?'Ermittlung im Team':'Das Duell beginnt')+'</div><div class="ring"><i></i><i></i><i></i><b>'+icon('map',40)+'</b></div><div class="h2">En route vers Paris …</div>'+
+  '<div class="tipbox"><span class="lbl">Le saviez-vous ?</span><p id="tip">'+esc(TIPS[G.tip%TIPS.length])+'</p></div><div class="prog"><i id="lprog"></i></div><div class="row" style="justify-content:center">'+plist().map(function(p){return avH(p.presence,30)}).join('')+'</div></div>'}
+function cityH(v){var S=G.S,c=v.ty==='bs'?CITIES[SCENES[S.boss].city]:cityOf(S.i);return '<div class="cityline">'+icon('map',18)+'<b>'+c.n+'</b><span>'+esc(c.f)+'</span></div>'}
+function clueH(my){var S=G.S,m=G.my,k=S.mode==='coop'?S.lt:m.okc,t=thief();
+  if(!my||!my.ok||G.spec||(S.mode==='coop'&&!S.good)||k<1||k>5)return '';return '<div class="clue">'+icon('key',18)+'<span><b>Indice n° '+k+' :</b> '+esc(t.c[k-1])+'</span></div>'}
+function typeName(v){return v.ty==='bs'?'Bildbeschreibung':v.ty==='mc'?'Auswahl':v.ty==='tf'?'Vrai ou faux':v.ty==='gp'?'Lückentext (tippen)':v.ty==='tr'?'Übersetzen (tippen)':v.ty==='ma'?'Zuordnen':'Satzbau'}
+function vQuestion(rv){var S=G.S,v=curView();if(!v)return '<div class="panel col" style="margin:auto;text-align:center"><div class="h2">Die Runde wird vorbereitet …</div><button class="btn" data-act="leave">Verlassen</button></div>';var boss=v.ty==='bs',coop=S.mode==='coop',my=G.myA[S.i];
+  var nodes='';for(var k=0;k<S.n;k++)nodes+='<span class="node'+(k<S.i||(k===S.i&&rv)?' past':k===S.i?' now':'')+'" title="'+cityOf(k).n+'">'+(k+1)+'</span>';
+  nodes+='<span class="node boss'+(S.i===S.n?(rv?' past':' now'):'')+'" title="Boss">'+icon('camera',16)+'</span>';
+  var tp=boss?'Boss: Bildbeschreibung':TOP[v.tp].n,res='';
+  if(rv){var ok=my&&my.ok,part=my&&!ok&&my.fr>0;
+    res='<div class="banner '+(my?(ok?'good':part?'neutral':'bad'):'neutral')+'">'+(G.spec?'Du schaust zu.':my?(ok?'Bravo ! +'+my.pts+' Punkte':part?'Fast richtig. +'+my.pts+' Punkte':'Leider falsch.'+(my.pts?' +'+my.pts:'')):'Keine Antwort gegeben.')+'</div>'+
+    (coop?'<div class="banner '+(S.good?'good':'bad')+'">'+(S.good?'Das Team findet einen Hinweis.':'Das Team verliert eine Spur: eine Flamme erlischt.')+'</div>':'')}
+  var body=boss?bsH(v,rv):v.ty==='ma'?maH(v,rv):v.ty==='or'?orH(v,rv):v.ty==='gp'?gpH(v,rv):v.ty==='tr'?trH(v,rv):optsH(v,rv);
+  var act='';
+  if(!rv&&!G.answered&&!G.spec){var ready=canConfirm(v),hb='';
+    if(myRole().id==='det'&&(v.ty==='mc'||v.ty==='gp'||v.ty==='tr')&&!G.cur.hp&&G.my.hints<3)hb='<button class="btn sm" data-act="hint">'+icon('bulb',16)+'Hinweis ('+(3-G.my.hints)+' übrig, −25)</button>';
+    if(v.ty!=='mc'&&v.ty!=='tf'||coop)act='<div class="row">'+hb+(v.ty==='or'?'<button class="btn sm" data-act="orreset">Zurücksetzen</button>':'')+'<span class="sp"></span><button class="btn gold" id="cfm" data-act="confirm"'+(ready?'':' disabled')+'>'+(coop&&(v.ty==='mc'||v.ty==='tf')?'Antwort der Gruppe festlegen':'Antwort bestätigen')+'</button></div>';
+    else if(hb)act='<div class="row">'+hb+'</div>'}
+  if(!rv&&G.answered&&!G.spec)act='<div class="banner neutral">Antwort gespeichert. Warte auf die anderen …</div>';
+  var rule=!rv&&!boss&&myRole().id==='arc'?'<div class="rulecard"><b>Regelkärtchen:</b> '+esc(RULE[v.tp])+'</div>':'';
+  var ex=rv?'<div class="expl"><b>Merke:</b> '+esc(boss?'Beschreibe zuerst Ort und Personen, dann deute die Situation. Nutze Gegenwart für das Bild und plus-que-parfait für das Davor.':v.ex)+'</div>':'';
+  var hostBtn=rv&&iAmHost()?'<div class="row"><span class="sp"></span><button class="btn" data-act="next">Weiter</button></div>':'';
+  var head='<div class="hud"><div class="nodes">'+nodes+'</div><div class="timer"><i id="tbar"></i></div><span class="tsec" id="tsec"></span></div>';
+  var story=coop?'<div class="story">'+(boss?'Letzte Spur: ein Foto vom Tatort. Was seht ihr?':'Die Spur führt weiter … Noch '+(S.n-S.i)+' Stationen bis zum Foto.')+'</div>':'';
+  var side='<div class="side">'+(coop?'<div class="panel pad-s col"><div class="lbl">Flammen des Teams</div><div class="flames">'+[0,1,2].map(function(i){return '<span class="'+(i<S.fl?'':'off')+'">'+icon('flame',24)+'</span>'}).join('')+'</div><div class="lbl">Hinweise gesammelt</div><div class="xp"><i style="width:'+Math.round(S.lt/(S.n+1)*100)+'%"></i></div></div>':'')+
+    '<div class="panel pad-s col"><div class="lbl">'+(coop?'Team':'Rangliste')+'</div>'+plH(true)+'</div></div>';
+  return warnH()+head+'<div class="game"><div class="panel qcard">'+story+cityH(v)+'<div class="qtag"><span class="chip" style="color:'+(boss?'var(--gold-2)':TOP[v.tp].c)+'">'+esc(tp)+'</span><span class="chip">'+typeName(v)+'</span></div>'+
+    ((v.ty==='mc'||v.ty==='tf'||v.ty==='ma'||v.ty==='or')?'<div class="qtext">'+esc(v.tx)+'</div>':'')+rule+body+act+res+clueH(my)+ex+hostBtn+'</div>'+side+'</div>'}
+function picks(k,rv){var S=G.S;return players().filter(function(p){var pr=p.presence;return rv?(pr.q===S.i&&pr.a===k):(pr.pk===k&&pr.q!==S.i)}).map(function(p){return avH(p.presence,20)}).join('')}
+function optsH(v,rv){var S=G.S,coop=S.mode==='coop',m=G.myA[S.i],mine=rv?(m?m.a:null):(G.answered&&m?m.a:G.cur.pk),hid=G.cur.hid||[];
+  return '<div class="opts">'+v.opts.map(function(o,k){var c='opt';
+    if(rv)c+=k===v.cor?' ok':mine===k?' bad':' dim';else if(G.answered)c+=(mine===k?' sel':' dim')+' lock';else if(G.spec)c+=' lock';else if(coop&&mine===k)c+=' sel';
+    if(!rv&&hid.indexOf(k)>=0)c+=' hid';
+    var dots=(rv||coop)?picks(k,rv):'';
+    return '<button class="'+c+'" data-act="opt" data-k="'+k+'"><span class="k">'+(v.ty==='tf'?(k?'✗':'✓'):'ABCD'[k])+'</span><span>'+esc(o)+'</span>'+(rv&&mine===k?'<span class="tag me">Du</span>':'')+(dots?'<span class="dots">'+dots+'</span>':'')+'</button>'}).join('')+'</div>'}
+function fr1(n){return n>=.999?'ok':n>0?'half':'bad'}
+function gpH(v,rv){var S=G.S,m=G.myA[S.i],c=G.cur,lock=G.answered||G.spec,vals=rv?(m&&m.a)||[]:(lock&&m?m.a:c.tx),h='<div class="gaptext">';
+  v.parts.forEach(function(p,i){h+=esc(p);if(i<v.ans.length){var ans=v.ans[i];
+    if(rv){var f=typedFr(vals[i]||'',ans);h+='<span class="blank '+fr1(f)+'" style="display:inline-block">'+esc(vals[i]||'—')+'</span>'+(f<.999?'<span class="sol"> → '+esc(ans[0])+'</span>':'')}
+    else h+='<input class="blank" type="text" data-i="'+i+'" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:'+Math.max(9,ans[0].length+4)+'ch"'+(lock?' disabled':'')+' value="'+esc(vals[i]||'')+'" aria-label="Lücke '+(i+1)+'">'+(c.hl?'<small class="muted">('+esc(ans[0].slice(0,2))+'…)</small>':'')}});
+  h+='</div>';if(!rv&&!lock)h+='<p class="muted">Tippe das Verb in der richtigen Form. Akzente zählen: ohne Akzent gibt es nur „fast richtig“.</p>';return h}
+function trH(v,rv){var S=G.S,m=G.myA[S.i],c=G.cur,lock=G.answered||G.spec,val=rv?(m&&typeof m.a==='string'?m.a:''):(lock&&m?m.a:c.tx[0]),h='<div class="de">'+esc(v.tx||v.de||'')+'</div>';
+  if(rv){var f=typedFr(val,v.vars);h+='<div class="ptxt '+fr1(f)+'">'+esc(val||'—')+'</div><div class="rulecard"><b>Musterlösung:</b> '+esc(v.vars[0])+(v.vars.length>1?'<br><small>Weitere richtige Varianten: '+esc(v.vars.slice(1,3).join(' · '))+'</small>':'')+'</div>'+(f>0&&f<.999?'<p class="muted">Als „fast richtig“ gewertet: Akzente, Artikel oder eine andere Formulierung. Frage im Zweifel deine Lehrkraft.</p>':'');return h}
+  h+='<textarea class="free" style="min-height:70px" data-i="0" '+(lock?'disabled':'')+' autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Écris ta phrase en français …" aria-label="Übersetzung">'+esc(val||'')+'</textarea>'+(c.hl?'<p class="muted">Tipp: Der Satz beginnt mit „'+esc(v.vars[0].slice(0,3))+'…“</p>':'<p class="muted">Tippe den ganzen Satz. Sinnvolle Varianten werden teils anerkannt.</p>');return h}
+function maH(v,rv){var S=G.S,m=G.myA[S.i],sel=rv?(m&&m.a)||[]:(G.answered&&m?m.a:G.cur.map),lock=G.answered||G.spec?' lock':'';
+  if(rv)return '<div class="col">'+v.L.map(function(l,i){var ok=sel[i]===v.map[i];return '<div class="opt '+(ok?'ok':'bad')+'"><span class="lt">'+(i+1)+'</span><span><b>'+esc(l)+'</b><br>'+esc(v.R[v.map[i]])+(ok||sel[i]==null||sel[i]<0?'':'<br><small class="muted">Deine Wahl: '+esc(v.R[sel[i]])+'</small>')+'</span></div>'}).join('')+'</div>';
+  return '<div class="pair"><div class="col">'+v.L.map(function(l,i){return '<button class="opt'+(G.cur.al===i?' sel':'')+lock+'" data-act="ml" data-i="'+i+'"><span class="lt">'+(i+1)+'</span><span>'+esc(l)+'</span>'+(sel[i]>=0?'<span class="slot">'+'ABCD'[sel[i]]+'</span>':'')+'</button>'}).join('')+'</div><div class="col">'+
+   v.R.map(function(r,j){return '<button class="opt'+lock+'" data-act="mr" data-j="'+j+'"><span class="lt">'+'ABCD'[j]+'</span><span>'+esc(r)+'</span></button>'}).join('')+'</div></div>'}
+function orH(v,rv){var S=G.S,m=G.myA[S.i],seq=rv?(m&&m.a)||[]:(G.answered&&m?m.a:G.cur.seq),lock=G.answered||G.spec?' lock':'';
+  var built=seq.map(function(d){return v.items[d]});
+  if(rv)return '<div class="built">'+built.map(function(w){return '<span class="word">'+esc(w)+'</span>'}).join('')+'</div><div class="rulecard"><b>Lösung:</b> '+esc(v.sorted.join(' '))+(v.alts.length?'<br><small>Auch möglich: '+esc(v.alts[0].join(' '))+'</small>':'')+'</div>';
+  return '<div class="built" aria-live="polite">'+(built.length?built.map(function(w){return '<span class="word">'+esc(w)+'</span>'}).join(''):'<span class="muted">Tippe die Wörter in der richtigen Reihenfolge an …</span>')+'</div><div class="words">'+v.items.map(function(t,d){var at=seq.indexOf(d);return '<button class="word'+(at>=0?' used':'')+lock+'" data-act="or" data-d="'+d+'">'+esc(t)+'</button>'}).join('')+'</div>'}
+function bsH(v,rv){var S=G.S,sc=SCENES[v.si],m=G.myA[S.i],c=G.cur,lock=G.answered||G.spec,tx=rv?((m&&m.a&&m.a.t)||['','','']):(lock&&m?(m.a.t||['','','']):c.tx);
+  var h='<div class="boss-case"><span class="lbl" style="color:var(--gold)">Boss : faire une description d’image</span><div class="scene" style="margin-top:8px">'+sceneSvg(v.si)+'</div></div>';
+  if(rv){var g=gradeBoss(v.si,tx);
+    h+='<div class="rubric">'+g.items.map(function(it){return '<div class="rub '+(it[1]>=it[2]?'on':it[1]>0?'':'off')+'"><span>'+esc(it[0])+'</span><b>'+it[1]+' / '+it[2]+'</b></div>'}).join('')+'<div class="rub on"><span><b>Gesamt</b> (ab 12 von 17 gilt der Boss als bestanden, automatische Prüfung)</span><b>'+g.pts+' / 17</b></div></div>';
+    h+='<div class="lbl">Dein Text</div><div class="ptxt">A: '+esc(tx[0]||'—')+'\n\nB: '+esc(tx[1]||'—')+'\n\nC: '+esc(tx[2]||'—')+'</div>';
+    h+='<div class="lbl">Musterbeschreibung</div><div class="model">Sur l’image, on voit '+esc(sc.L)+'. '+sc.ps.map(function(p){return esc(p.d)}).join(' ')+' Ils semblent passer un bon moment.<br><br><b>B :</b> '+esc(sc.B)+'<br><b>C :</b> '+esc(sc.C)+'</div>';
+    var oth=players().filter(function(p){return !p.sameTab&&p.presence.q===S.i&&p.presence.a&&p.presence.a.t});
+    if(oth.length)h+='<div class="lbl">Texte der anderen</div>'+oth.map(function(p){var t=p.presence.a.t;return '<div class="ptxt"><b>'+nm(p.presence)+':</b> '+esc(String(t[0]||'').slice(0,380))+'</div>'}).join('');
+    return h}
+  var wc=(tx[0]||'').trim().split(/\s+/).filter(Boolean).length,d=lock?' disabled':'';
+  h+='<div class="col"><div><div class="lbl">A · Beschreibe das Bild (Ort, mind. zwei Personen genau, eine Vermutung) – ca. 40–60 Wörter</div><textarea class="free" style="min-height:150px" data-i="0"'+d+' autocomplete="off" spellcheck="false" placeholder="Sur l’image, on voit …" aria-label="Teil A">'+esc(tx[0]||'')+'</textarea><small class="muted" id="wc">'+wc+' Wörter</small></div>'+
+   '<div><div class="lbl">B · Zwei Sätze im plus-que-parfait: Was war vorher passiert?</div><textarea class="free" data-i="1"'+d+' autocomplete="off" spellcheck="false" placeholder="Avant, la femme avait …" aria-label="Teil B">'+esc(tx[1]||'')+'</textarea></div>'+
+   '<div><div class="lbl">C · Ein Satz mit pour / sans / avant de / après avoir|être + Infinitiv</div><textarea class="free" style="min-height:70px" data-i="2"'+d+' autocomplete="off" spellcheck="false" placeholder="Il sourit pour …" aria-label="Teil C">'+esc(tx[2]||'')+'</textarea></div></div>';
+  return h}
+function vEnd(){var S=G.S,ps=plist().filter(function(p){return !p.presence.sp}).sort(function(a,b){return (+b.presence.sc||0)-(+a.presence.sc||0)}),coop=S.mode==='coop',g=G.gain,t=thief();
+  var top='';
+  if(coop)top='<div class="banner '+(S.win?'good':'bad')+'" style="justify-content:center;font-size:20px">'+(S.win?'Ihr habt die Spur bis zum Ende verfolgt!':'Die Spur ist kalt geworden. Versucht es noch einmal.')+'</div>';
+  else top='<div class="podium">'+ps.slice(0,3).map(function(p,i){return '<div class="pod'+(i===0?' first':'')+'"><span class="rk">'+(i+1)+'</span>'+avH(p.presence,54)+'<b>'+nm(p.presence)+'</b><span class="muted">'+(+p.presence.sc||0)+' Punkte</span></div>'}).join('')+'</div>';
+  var cl=g?g.cl:Math.min(5,coop?S.lt:G.my.okc);
+  var det='<div class="panel pad-s col"><div class="lbl">Dein Dossier</div>'+t.c.slice(0,cl).map(function(x,i){return '<div class="clue">'+icon('key',16)+'<span><b>'+(i+1)+'.</b> '+esc(x)+'</span></div>'}).join('')+
+    '<div class="rulecard"><b>Der Dieb ist :</b> '+(cl>=4?esc(t.n)+(cl>=5?' – du hast ihn entlarvt !':' (fast sicher)'):'… Dir fehlen noch Hinweise ('+cl+' von 5).')+'</div></div>';
+  var gain=g?'<div class="gain"><span class="chip ok">+'+g.xp+' Erfahrung</span>'+g.nb.map(function(id){var b=BADGES.filter(function(x){return x.id===id})[0];return '<span class="chip warn">Neues Abzeichen: '+esc(b.n)+'</span>'}).join('')+'</div>':'';
+  return warnH()+'<div class="panel col" style="max-width:720px;margin:auto;width:100%"><div class="h2" style="text-align:center">'+(coop?'Fin de l’enquête':'Le duel est terminé')+'</div>'+top+det+gain+'<div class="lbl">Ergebnis</div>'+plH(true)+
+   '<div class="row" style="justify-content:center"><button class="btn" data-act="book">'+icon('book',18)+'Buch lesen</button>'+(iAmHost()?'<button class="btn gold" data-act="again">Neue Runde mit neuen Fragen</button>':'<span class="chip">Der Gastgeber startet die nächste Runde</span>')+'<button class="btn ghost" data-act="leave">Verlassen</button></div></div>'}
+function tickUI(){var S=G.S;if(!S)return;var left=Math.max(0,(G.dl-Date.now())/1000),tb=$('#tbar'),ts=$('#tsec'),v=S.ph==='q'?curView():null;
+  if(tb&&ts){var dur=S.ph==='q'?(v?v.dur:30):(S.i>=S.n?60:12);tb.style.width=Math.min(100,left/dur*100)+'%';tb.parentNode.classList.toggle('low',S.ph==='q'&&left<8);ts.textContent=Math.ceil(left)}
+  var pr=$('#lprog');if(pr&&S.ph==='load')pr.style.width=Math.min(100,(1-left/8)*100)+'%';
+  var tp=$('#tip');if(tp&&S.ph==='load'&&Date.now()-G.tipAt>3200){G.tipAt=Date.now();G.tip=(G.tip+1)%TIPS.length;tp.textContent=TIPS[G.tip];tp.style.animation='none';void tp.offsetWidth;tp.style.animation=''}}
+/* ---------- Overlays ---------- */
+function closeOv(){$('#overlay').innerHTML=''}
+function renderBook(){var i=G.book;$('#overlay').innerHTML='<div class="overlay" data-act="ovbg"><div class="book" role="dialog" aria-modal="true" aria-label="Buch"><div class="bhead">'+icon('book',22)+'<span class="h2" style="font-size:20px">Le Grand Livre</span><span class="sp"></span><button class="icon-btn" data-act="close" aria-label="Schließen">'+icon('x')+'</button></div><nav class="toc">'+BOOK.map(function(b,k){return '<button class="'+(k===i?'on':'')+'" data-act="bk" data-i="'+k+'">'+esc(b.t)+'</button>'}).join('')+'</nav><article class="page">'+BOOK[i].h+'</article></div></div>';
+  var g=$('#vocg');if(g)g.innerHTML=VOC.map(function(v){return '<div><b>'+esc(v[1])+'</b> – '+esc(v[0])+'</div>'}).join('')}
+function renderBadges(){$('#overlay').innerHTML='<div class="overlay" data-act="ovbg"><div class="panel dlg" role="dialog" aria-modal="true" aria-label="Abzeichen"><div class="row"><span class="h2">Deine Abzeichen</span><span class="sp"></span><button class="icon-btn" data-act="close" aria-label="Schließen">'+icon('x')+'</button></div>'+BADGES.map(function(b){return '<div class="badge'+(P.badges[b.id]?'':' off')+'"><span class="bi">'+icon(b.i,22)+'</span><div><b>'+esc(b.n)+'</b><small>'+esc(b.d)+'</small></div></div>'}).join('')+'</div></div>'}
+function renderRoles(){$('#overlay').innerHTML='<div class="overlay" data-act="ovbg"><div class="panel dlg" role="dialog" aria-modal="true" aria-label="Rollen"><div class="row"><span class="h2">Deine Rolle</span><span class="sp"></span><button class="icon-btn" data-act="close" aria-label="Schließen">'+icon('x')+'</button></div><div class="col" id="roles">'+rolesH()+'</div></div></div>'}
+
+/* ---------- Aktionen ---------- */
+var AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newCode(){var s='';for(var i=0;i<5;i++)s+=AL[Math.floor(Math.random()*AL.length)];return s}
+function openBook(i){G.book=i||0;renderBook();if(giveBadge('reader'))toast('Neues Abzeichen: Bibliophile')}
+var resetLobby={ph:'lobby',ids:[],seed:0,boss:0,i:0,fl:3,lt:0,good:0,win:0,left:0};
+var ACT={
+ sig:function(el,d){P.av=+d.i;saveP();document.querySelectorAll('.sig').forEach(function(b){b.classList.toggle('on',b===el)})},
+ role:function(el,d){P.role=+d.i;saveP();var r=$('#roles');if(r)r.innerHTML=rolesH();if(G.room){pres({role:P.role});if(P.roles.indexOf(P.role)<0){P.roles.push(P.role);if(P.roles.length>=3)giveBadge('curieux');saveP()}}if(G.screen!=='intro'&&!G.room)render()},
+ enter:function(){var v=($('#nm').value||'').trim().slice(0,18);if(!v){toast('Bitte gib einen Namen ein.');return}P.name=v;saveP();go('menu')},
+ rename:function(){go('intro')},
+ create:function(){joinRoom(newCode(),false)},
+ join:function(){var c=($('#code').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c.length<4){toast('Der Code hat 5 Zeichen.');return}joinRoom(c,false)},
+ solo:function(){joinRoom('SOLO',true)},
+ book:function(){openBook(0)},badges:function(){renderBadges()},roles:function(){renderRoles()},close:function(){closeOv();if(G.screen==='menu')render()},bk:function(el,d){G.book=+d.i;renderBook()},
+ copy:function(){var done=function(){toast('Code kopiert: '+G.code)},fail=function(){toast('Dein Code lautet '+G.code,5000)};try{navigator.clipboard.writeText(G.code).then(done,fail)}catch(e){fail()}},
+ leave:function(){leaveRoom()},
+ mode:function(el,d){if(iAmHost())hostEmit({mode:d.m})},
+ tp:function(el,d){if(!iAmHost())return;var t=G.S.tp.slice(),i=t.indexOf(d.t);if(i>=0){if(t.length>1)t.splice(i,1);else{toast('Mindestens ein Thema bleibt aktiv.');return}}else t.push(d.t);hostEmit({tp:t})},
+ len:function(el,d){if(iAmHost())hostEmit({n:+d.v})},
+ start:function(){if(iAmHost())startRun()},
+ again:function(){if(iAmHost())hostEmit(resetLobby)},
+ next:function(){if(iAmHost()&&G.S.ph==='rv')hostNext()},
+ opt:function(el,d){var S=G.S;if(!S||S.ph!=='q'||G.answered||G.spec)return;var k=+d.k;if(S.mode==='coop'){G.cur.pk=k;pres({pk:k});render()}else submit(k)},
+ confirm:function(){var v=curView();if(v&&canConfirm(v))autoSubmit()},
+ ml:function(el,d){if(G.answered||G.spec)return;G.cur.al=+d.i;render()},
+ mr:function(el,d){if(G.answered||G.spec)return;var c=G.cur,j=+d.j,i=c.al;if(i<0)i=c.map.indexOf(-1);if(i<0)return;c.map=c.map.map(function(x){return x===j?-1:x});c.map[i]=j;c.al=c.map.indexOf(-1);render()},
+ or:function(el,d){if(G.answered||G.spec)return;var q=G.cur.seq,k=+d.d;if(q.indexOf(k)<0)q.push(k);render()},
+ orreset:function(){G.cur.seq=[];render()},
+ hint:function(){var v=curView(),S=G.S;if(!v||S.ph!=='q'||G.answered||G.spec||myRole().id!=='det'||G.my.hints>=3||G.cur.hp)return;
+  if(v.ty==='mc'){var w=[];v.opts.forEach(function(_,k){if(k!==v.cor)w.push(k)});G.cur.hid=shuffle(w).slice(0,2);if(G.cur.pk>=0&&G.cur.hid.indexOf(G.cur.pk)>=0)G.cur.pk=-1}
+  else if(v.ty==='gp'||v.ty==='tr')G.cur.hl=1;else return;
+  G.cur.hp=1;G.my.hints++;render()}
+};
+document.addEventListener('click',function(e){var t=e.target;
+  if(t.dataset&&t.dataset.act==='ovbg'){closeOv();return}
+  var el=t.closest&&t.closest('[data-act]');if(!el||el.dataset.act==='ovbg')return;var f=ACT[el.dataset.act];if(f)f(el,el.dataset)});
+document.addEventListener('input',function(e){var t=e.target;
+  if(!(t&&t.dataset&&t.dataset.i!=null&&t.matches&&t.matches('input.blank,textarea.free')))return;
+  if(G.answered||G.spec||!G.cur.tx)return;G.cur.tx[+t.dataset.i]=t.value;
+  var v=curView(),b=$('#cfm');if(v&&b)b.disabled=!canConfirm(v);
+  if(v&&v.ty==='bs'&&t.dataset.i==='0'){var w=$('#wc');if(w)w.textContent=t.value.trim().split(/\s+/).filter(Boolean).length+' Wörter'}});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&$('#overlay').firstChild){closeOv();return}
+  if(e.key==='Enter'&&e.target.id==='nm'){ACT.enter();return}
+  if(e.key==='Enter'&&e.target.id==='code'){ACT.join();return}
+  if(e.key==='Enter'&&e.target.matches&&e.target.matches('input.blank')){e.preventDefault();var v=curView();if(v&&v.ty==='gp'){var ins=Array.prototype.slice.call(document.querySelectorAll('input.blank')),k=ins.indexOf(e.target);if(k<ins.length-1)ins[k+1].focus();else ACT.confirm()}}});
+/* ---------- Funkenflug im Hintergrund ---------- */
+(function(){var c=$('#motes'),x=c.getContext('2d'),W=0,H=0,m=[],i;
+  function rs(){W=c.width=innerWidth;H=c.height=innerHeight}rs();addEventListener('resize',rs);
+  for(i=0;i<45;i++)m.push({x:Math.random()*W,y:Math.random()*H,r:.6+Math.random()*1.6,s:.06+Math.random()*.25,p:Math.random()*6.28});
+  function f(t){x.clearRect(0,0,W,H);m.forEach(function(o){o.y-=o.s;o.x+=Math.sin(t/2200+o.p)*.25;if(o.y<-5){o.y=H+5;o.x=Math.random()*W}
+    x.beginPath();x.fillStyle='rgba(255,217,140,'+(.18+.2*Math.sin(t/900+o.p))+')';x.arc(o.x,o.y,o.r,0,6.28);x.fill()});requestAnimationFrame(f)}
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)requestAnimationFrame(f)})();
+
+/* ---------- Firebase-Anbindung für GitHub Pages ---------- */
+var FBC=window.FIL_CONFIG||{};
+function FbRoom(name){
+  var db=firebase.database(),root=db.ref('fil/'+name),pRef=root.child('p'),sRef=root.child('state'),cRef=db.ref('.info/connected'),
+  me='p'+Math.random().toString(36).slice(2,9),mine=pRef.child(me),pr={},others={},hs={},ph=[],cn=[],lastS=null,left=false;
+  function peers(){var a=[{peer:me,presence:pr,isMe:true,sameTab:true,kind:'viewer',guest:false,by:null,updatedAt:Date.now()}];
+    Object.keys(others).forEach(function(k){a.push({peer:k,presence:others[k],isMe:false,sameTab:false,kind:'viewer',guest:false,by:null,updatedAt:Date.now()})});return a}
+  function fire(j,l){ph.slice().forEach(function(h){h({peers:peers(),joined:j,left:l,updated:[]})})}
+  function msg(v){return {topic:'state',data:v,peer:'db',isMe:false,sameTab:false,kind:'viewer',guest:false,by:null}}
+  function onP(snap){var v=snap.val()||{},old=others,j=[],l=[];others={};
+    Object.keys(v).forEach(function(k){if(k!==me){others[k]=v[k]||{};if(!old[k])j.push({peer:k,isMe:false})}});
+    Object.keys(old).forEach(function(k){if(!others[k])l.push({peer:k,isMe:false})});fire(j,l)}
+  function onS(snap){var v=snap.val();if(!v)return;lastS=v;(hs.state||[]).slice().forEach(function(h){h(msg(v))})}
+  function onC(snap){var c=!!snap.val();cn.slice().forEach(function(h){h(c)})}
+  try{mine.onDisconnect().remove()}catch(e){}
+  pRef.on('value',onP);sRef.on('value',onS);cRef.on('value',onC);
+  return {
+    emit:function(t,d){if(t!=='state'||left)return Promise.resolve();return sRef.set(JSON.parse(JSON.stringify(d)))},
+    on:function(t,h){(hs[t]=hs[t]||[]).push(h);if(t==='state'&&lastS)setTimeout(function(){h(msg(lastS))},0);return function(){hs[t]=(hs[t]||[]).filter(function(x){return x!==h})}},
+    presence:function(p){if(left)return Promise.resolve();var n=Object.assign({},pr);for(var k in p){if(p[k]===null)delete n[k];else n[k]=p[k]}pr=n;fire([],[]);return mine.update(p)},
+    peers:peers,
+    onPeers:function(h){ph.push(h);setTimeout(function(){h({peers:peers(),joined:peers(),left:[],updated:[]})},0);return function(){ph=ph.filter(function(x){return x!==h})}},
+    connected:function(){return true},
+    onConnection:function(h){cn.push(h);return function(){cn=cn.filter(function(x){return x!==h})}},
+    leave:function(){left=true;try{pRef.off('value',onP);sRef.off('value',onS);cRef.off('value',onC);mine.onDisconnect().cancel()}catch(e){}return mine.remove()}}}
+function fbJoin(name){var db=firebase.database(),pRef=db.ref('fil/'+name+'/p'),sRef=db.ref('fil/'+name+'/state');
+  return pRef.once('value').then(function(s){if(!s.val())return sRef.remove()}).then(function(){return FbRoom(name)})}
+/* ---------- Start ---------- */
+render(true);
+(function(){if(window.firebase&&String(FBC.databaseURL).indexOf('HIER')<0){try{firebase.initializeApp(FBC);base={join:fbJoin}}catch(e){base=null}}netState=base?1:2;updateNet()})();
+})();
+</script>
+
+</body></html>
